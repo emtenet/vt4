@@ -9,7 +9,8 @@ use std::path::Path;
 pub struct Font {
 	pub height: usize,
 	pub width: usize,
-	pub glyphs: HashMap<char, Glyph>,
+	pub glyphs: HashMap<usize, Glyph>,
+	pub blank: Glyph,
 }
 
 pub struct Glyph {
@@ -96,10 +97,7 @@ impl Font {
 			let Some(code_point) = code_point.strip_prefix("U+") else {
 				bail!("Expecting STARTCHAR 'U+' found '{}'", code_point);
 			};
-			let code_point = u32::from_str_radix(code_point, 16).context("STARTCHAR")?;
-			let Some(code_point) = char::from_u32(code_point) else {
-				bail!("Invalid STARTCHAR code point {}", code_point);
-			};
+			let code_point = u32::from_str_radix(code_point, 16).context("STARTCHAR")? as usize;
 			let mut glyph = Glyph {
 				width: 0,
 				height: 0,
@@ -154,11 +152,29 @@ impl Font {
 			glyphs.insert(code_point, glyph);
 		}
 
+		let mut blank = Glyph {
+			width,
+			height,
+			rows: Vec::new(),
+		};
+		for _ in 0..height {
+			blank.rows.push(0);
+		}
+
 		Ok(Font {
 			width,
 			height,
 			glyphs,
+			blank,
 		})
+	}
+
+	pub fn glyph(&self, index: usize) -> &Glyph {
+		if let Some(glyph) = self.glyphs.get(&index) {
+			glyph
+		} else {
+			&self.blank
+		}
 	}
 }
 
