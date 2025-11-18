@@ -162,7 +162,7 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("\n");
     verilog.push_str("endmodule\n");
 
-    std::fs::write("../char_rom.v", &verilog)?;
+    std::fs::write("../fpga/char_rom.v", &verilog)?;
 
     Ok(())
 }

@@ -2,7 +2,7 @@ BOARD=tangnano9k
 FAMILY=GW1N-9C
 DEVICE=GW1NR-LV9QN88PC6/I5
 
-VERILOG=top.v pll.v vga.v vga_axis.v
+VERILOG=top.v char_rom.v vga.v vga_axis.v
 
 all: build/bitstream.fs
 

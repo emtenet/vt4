@@ -8,6 +8,7 @@ module vga
     output wire hsync,
     output wire vsync,
 
+    output wire block,
     output wire [6:0] h_block,
     output wire [3:0] h_pixel,
     output wire [4:0] v_block,
@@ -58,6 +59,7 @@ vga_axis #(
     .pixel(v_pixel)
 );
 
-assign  de = h_active & v_active;
+assign de = h_active & v_active;
+assign block = de & (h_pixel == 4'b0000);
 
 endmodule
