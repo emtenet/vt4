@@ -2,25 +2,24 @@
 module vga
 (
     input wire clk,
-    input wire reset_low,
 
     output wire de,
     output wire hsync,
     output wire vsync,
 
-    output wire block,
-    output wire [6:0] h_block,
+    output wire glyph,
+    output wire [6:0] h_glyph,
     output wire [3:0] h_pixel,
-    output wire [4:0] v_block,
+    output wire [4:0] v_glyph,
     output wire [4:0] v_pixel
 );
 
-wire next_row;
+wire v_ce;
 wire h_active;
 wire v_active;
 
 vga_axis #(
-    .BLOCKS(80),
+    .GLYPHS(80),
     .PIXELS(10),
     .FRONT_PORCH(36), // 27MHz
     // .FRONT_PORCH(210), // 33Mhz
@@ -28,19 +27,18 @@ vga_axis #(
 ) h_axis
 (
     .clk(clk),
-    .reset_low(reset_low),
+    .ce(1'b1),
 
-    .increment(1'b1),
-    .carry(next_row),
+    .carry(v_ce),
     .active(h_active),
     .sync(hsync),
 
-    .block(h_block),
+    .glyph(h_glyph),
     .pixel(h_pixel)
 );
 
 vga_axis #(
-    .BLOCKS(24),
+    .GLYPHS(24),
     .PIXELS(20),
     .FRONT_PORCH(7), // 27MHz
     // .FRONT_PORCH(22), // 33Mhz
@@ -48,18 +46,17 @@ vga_axis #(
 ) v_axis
 (
     .clk(clk),
-    .reset_low(reset_low),
+    .ce(v_ce),
 
-    .increment(next_row),
     .active(v_active),
     .carry(),
     .sync(vsync),
 
-    .block(v_block),
+    .glyph(v_glyph),
     .pixel(v_pixel)
 );
 
 assign de = h_active & v_active;
-assign block = de & (h_pixel == 4'b0000);
+assign glyph = de & (h_pixel == 4'b0000);
 
 endmodule
