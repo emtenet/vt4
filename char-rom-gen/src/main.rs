@@ -1,7 +1,11 @@
+use anyhow::Context;
+
 mod bdf;
 
 fn main() -> anyhow::Result<()> {
-    let font = bdf::read("Tamzen10x20r.bdf")?;
+    let bdf = reqwest::blocking::get("https://github.com/sunaku/tamzen-font/raw/refs/heads/master/bdf/Tamzen10x20r.bdf")?
+        .text()?;
+    let mut font = bdf::parse(&bdf).context("Tamzen10x20r.bdf")?;
 
     assert_eq!(font.width, 10);
     assert_eq!(font.height, 20);
@@ -10,8 +14,43 @@ fn main() -> anyhow::Result<()> {
         assert_eq!(glyph.height, font.height);
     }
 
-    let mut verilog = String::with_capacity(30000);
+    // Use "Left double angle quotes" as "Delete"
+    font.glyph_copy(0xAB, 0x7f);
 
+    let bdf = reqwest::blocking::get("https://github.com/sunaku/tamzen-font/raw/refs/heads/master/bdf/Tamzen7x14r.bdf")?
+        .text()?;
+    let small = bdf::parse(&bdf).context("Tamzen7x14r.bdf")?;
+    for index in 1..32 {
+        let mut rows = vec![
+            0, 0, 0,
+            0x1f8,
+            0x3fc, 0x3fc, 0x3fc, 0x3fc,
+            0x3fc, 0x3fc, 0x3fc, 0x3fc,
+            0x3fc, 0x3fc, 0x3fc, 0x3fc,
+            0x1f8,
+            0, 0, 0,
+            // left-vertical-bar
+            // 0, 0, 0, 0,
+            // 0x200, 0x200, 0x200, 0x200,
+            // 0x200, 0x200, 0x200, 0x200,
+            // 0x200, 0x200, 0x200, 0x200,
+            // 0, 0, 0, 0,
+        ];
+        let small = small.glyph(0x40 + index).expect("A..Z");
+        for (i, row) in small.rows.iter().enumerate() {
+            rows[i + 3] ^= row << 2;
+        }
+        font.glyph_add(index, rows);
+    }
+
+    let mut verilog = String::with_capacity(30000);
+    char_rom(&font, &mut verilog);
+    std::fs::write("../fpga/char_rom.v", &verilog)?;
+
+    Ok(())
+}
+
+fn char_rom(font: &bdf::Font, verilog: &mut String) {
     verilog.push_str("`default_nettype none\n");
     verilog.push_str("module char_rom\n");
     verilog.push_str("(\n");
@@ -53,7 +92,7 @@ fn main() -> anyhow::Result<()> {
             line.reserve(110);
             for lower in (0..32).rev() {
                 let glyph = (upper * 32) + lower;
-                let glyph = font.glyph(glyph);
+                let glyph = font.glyph_or_blank(glyph);
                 let row = glyph.rows[row];
                 line.push(char::from_digit(((row >> 4) & 15) as u32, 16).expect("hex"));
                 line.push(char::from_digit(((row >> 0) & 15) as u32, 16).expect("hex"));
@@ -81,7 +120,7 @@ fn main() -> anyhow::Result<()> {
             line.reserve(110);
             for lower in (0..32).rev() {
                 let glyph = (upper * 32) + lower;
-                let glyph = font.glyph(glyph);
+                let glyph = font.glyph_or_blank(glyph);
                 let row = glyph.rows[row];
                 line.push(char::from_digit(((row >> 4) & 15) as u32, 16).expect("hex"));
                 line.push(char::from_digit(((row >> 0) & 15) as u32, 16).expect("hex"));
@@ -109,7 +148,7 @@ fn main() -> anyhow::Result<()> {
             line.reserve(110);
             for lower in (0..32).rev() {
                 let glyph = (upper * 32) + lower;
-                let glyph = font.glyph(glyph);
+                let glyph = font.glyph_or_blank(glyph);
                 let row = glyph.rows[row];
                 line.push(char::from_digit(((row >> 4) & 15) as u32, 16).expect("hex"));
                 line.push(char::from_digit(((row >> 0) & 15) as u32, 16).expect("hex"));
@@ -138,7 +177,7 @@ fn main() -> anyhow::Result<()> {
             let mut digit = 0u32;
             for lower in (0..128).rev() {
                 let glyph = (upper * 128) + lower;
-                let glyph = font.glyph(glyph);
+                let glyph = font.glyph_or_blank(glyph);
                 let row = glyph.rows[row];
                 if lower % 2 == 1 {
                     digit = ((row >> 6) & 12) as u32;
@@ -161,8 +200,4 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("            : {block_3_q[1:0], block_0_q[7:0]});\n");
     verilog.push_str("\n");
     verilog.push_str("endmodule\n");
-
-    std::fs::write("../fpga/char_rom.v", &verilog)?;
-
-    Ok(())
 }

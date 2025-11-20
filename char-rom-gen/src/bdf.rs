@@ -4,7 +4,6 @@ use anyhow::{
 	Result,
 };
 use std::collections::HashMap;
-use std::path::Path;
 
 pub struct Font {
 	pub height: usize,
@@ -13,24 +12,19 @@ pub struct Font {
 	pub blank: Glyph,
 }
 
+#[derive(Clone)]
 pub struct Glyph {
 	pub height: usize,
 	pub width: usize,
 	pub rows: Vec<usize>,
 }
 
-pub fn read<P: AsRef<Path>>(path: P) -> Result<Font> {
-	let path = path.as_ref();
-
-	Font::read(path)
-		.with_context(|| {
-			format!("Could not read BDF file {:?}", path)
-		})
+pub fn parse(lines: &str) -> Result<Font> {
+	Font::parse(lines)
 }
 
 impl Font {
-	fn read(path: &Path) -> Result<Self> {
-		let lines = std::fs::read_to_string(path)?;
+	fn parse(lines: &str) -> Result<Self> {
 		let mut lines = Lines::new(&lines);
 		let mut got_size = false;
 		let mut height = 0usize;
@@ -169,7 +163,31 @@ impl Font {
 		})
 	}
 
-	pub fn glyph(&self, index: usize) -> &Glyph {
+	pub fn glyph_add(&mut self, index: usize, mut rows: Vec<usize>) {
+		rows.resize(self.height, 0);
+		let mask = (1 << self.width) - 1;
+		for row in rows.iter_mut() {
+			*row &= mask;
+		}
+		self.glyphs.insert(index, Glyph {
+			width: self.width,
+			height: self.height,
+			rows,
+		});
+	}
+
+	pub fn glyph_copy(&mut self, from: usize, to: usize) {
+		if let Some(glyph) = self.glyphs.get(&from) {
+			let glyph = glyph.clone();
+			self.glyphs.insert(to, glyph);
+		}
+	}
+
+	pub fn glyph(&self, index: usize) -> Option<&Glyph> {
+		self.glyphs.get(&index)
+	}
+
+	pub fn glyph_or_blank(&self, index: usize) -> &Glyph {
 		if let Some(glyph) = self.glyphs.get(&index) {
 			glyph
 		} else {
