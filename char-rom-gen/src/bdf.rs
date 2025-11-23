@@ -176,13 +176,6 @@ impl Font {
 		});
 	}
 
-	pub fn glyph_copy(&mut self, from: usize, to: usize) {
-		if let Some(glyph) = self.glyphs.get(&from) {
-			let glyph = glyph.clone();
-			self.glyphs.insert(to, glyph);
-		}
-	}
-
 	pub fn glyph(&self, index: usize) -> Option<&Glyph> {
 		self.glyphs.get(&index)
 	}

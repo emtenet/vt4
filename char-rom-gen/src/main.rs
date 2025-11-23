@@ -14,33 +14,61 @@ fn main() -> anyhow::Result<()> {
         assert_eq!(glyph.height, font.height);
     }
 
-    // Use "Left double angle quotes" as "Delete"
-    font.glyph_copy(0xAB, 0x7f);
-
+    // construct "^C" style control codes
     let bdf = reqwest::blocking::get("https://github.com/sunaku/tamzen-font/raw/refs/heads/master/bdf/Tamzen7x14r.bdf")?
         .text()?;
     let small = bdf::parse(&bdf).context("Tamzen7x14r.bdf")?;
     for index in 1..32 {
+        // start with the "^" hat
         let mut rows = vec![
             0, 0, 0,
-            0x1f8,
-            0x3fc, 0x3fc, 0x3fc, 0x3fc,
-            0x3fc, 0x3fc, 0x3fc, 0x3fc,
-            0x3fc, 0x3fc, 0x3fc, 0x3fc,
-            0x1f8,
+            128, 256+64, 512+32,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
             0, 0, 0,
-            // left-vertical-bar
-            // 0, 0, 0, 0,
-            // 0x200, 0x200, 0x200, 0x200,
-            // 0x200, 0x200, 0x200, 0x200,
-            // 0x200, 0x200, 0x200, 0x200,
-            // 0, 0, 0, 0,
+            0, 0, 0,
         ];
+        // as the small capital letter
         let small = small.glyph(0x40 + index).expect("A..Z");
         for (i, row) in small.rows.iter().enumerate() {
-            rows[i + 3] ^= row << 2;
+            rows[i + 3] ^= row;
         }
         font.glyph_add(index, rows);
+    }
+
+    // construct diagonal two digit hex glpyhs for non-ASCII
+    let bdf = reqwest::blocking::get("https://github.com/sunaku/tamzen-font/raw/refs/heads/master/bdf/Tamzen7x13r.bdf")?
+        .text()?;
+    let small = bdf::parse(&bdf).context("Tamzen7x13r.bdf")?;
+    for index in 127..256 {
+        // start with empty glyph
+        let mut rows = vec![
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+        ];
+        // top-left digit
+        let digit = (index >> 4) & 15;
+        let digit = char::from_digit(digit, 16).expect("hex")
+            .to_ascii_uppercase() as usize;
+        let digit = small.glyph(digit).expect("0..9 A..F");
+        for (i, row) in digit.rows.iter().enumerate() {
+            if i > 0 {
+                rows[i - 1] ^= row << 3;
+            }
+        }
+        // bottom-right digit
+        let digit = index & 15;
+        let digit = char::from_digit(digit, 16).expect("hex")
+            .to_ascii_uppercase() as usize;
+        let digit = small.glyph(digit).expect("0..9 A..F");
+        for (i, row) in digit.rows.iter().enumerate() {
+            rows[i + 7] ^= row;
+        }
+        // add glyph
+        font.glyph_add(index as usize, rows);
     }
 
     let mut verilog = String::with_capacity(30000);
