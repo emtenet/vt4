@@ -17,7 +17,7 @@ IO_PORT "lcd_vsync" IO_TYPE=LVCMOS33 DRIVE=24;
 IO_LOC "lcd_hsync" 40;
 IO_PORT "lcd_hsync" IO_TYPE=LVCMOS33 DRIVE=24;
 IO_LOC "lcd_backlight" 86;
-IO_PORT "lcd_backlight" IO_TYPE=LVCMOS33;
+IO_PORT "lcd_backlight" IO_TYPE=LVCMOS18 PULL_MODE=NONE OPEN_DRAIN=ON;
 IO_LOC "lcd_b[4]" 41;
 IO_PORT "lcd_b[4]" IO_TYPE=LVCMOS33 DRIVE=24;
 IO_LOC "lcd_b[3]" 42;

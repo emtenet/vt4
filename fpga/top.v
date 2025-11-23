@@ -3,6 +3,9 @@ module top
 (
     input wire xtal_in,
 
+    input wire button,
+    output wire lcd_backlight,
+
     output wire lcd_clk,
     output wire lcd_hsync,
     output wire lcd_vsync,
@@ -115,6 +118,8 @@ assign lcd_de = stage3_de;
 assign lcd_r = {{2{stage3_pixel}}, 3'b000};
 assign lcd_g = {{2{stage3_pixel}}, 4'b0000};
 assign lcd_b = {{2{stage3_pixel}}, 3'b000};
+
+assign lcd_backlight = button;
 
 endmodule
 
