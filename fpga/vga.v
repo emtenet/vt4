@@ -7,16 +7,22 @@ module vga
     output wire hsync,
     output wire vsync,
 
-    output wire glyph,
-    output wire [6:0] h_glyph,
-    output wire [3:0] h_pixel,
-    output wire [4:0] v_glyph,
-    output wire [4:0] v_pixel
+    output wire row_first,
+    output wire row_start,
+    output wire [4:0] row_index,
+    output wire [4:0] row_pixel,
+
+    output wire col_first,
+    output wire col_start,
+    output wire [6:0] col_index,
+    output wire [3:0] col_pixel
 );
 
 wire v_ce;
 wire h_active;
 wire v_active;
+wire col_is_first;
+wire col_is_start;
 
 vga_axis #(
     .GLYPHS(80),
@@ -33,8 +39,10 @@ vga_axis #(
     .active(h_active),
     .sync(hsync),
 
-    .glyph(h_glyph),
-    .pixel(h_pixel)
+    .glyph_is_zero(col_is_first),
+    .pixel_is_zero(col_is_start),
+    .glyph_index(col_index),
+    .pixel_index(col_pixel)
 );
 
 vga_axis #(
@@ -52,11 +60,14 @@ vga_axis #(
     .carry(),
     .sync(vsync),
 
-    .glyph(v_glyph),
-    .pixel(v_pixel)
+    .glyph_is_zero(row_first),
+    .pixel_is_zero(row_start),
+    .glyph_index(row_index),
+    .pixel_index(row_pixel)
 );
 
 assign de = h_active & v_active;
-assign glyph = de & (h_pixel == 4'b0000);
+assign col_first = col_is_first & v_active;
+assign col_start = col_is_start & v_active;
 
 endmodule
