@@ -1,125 +1,142 @@
 `default_nettype none
-module top
-(
-    input wire xtal_in,
+module top (
+    input wire          xtal,
 
-    input wire button,
-    output wire lcd_backlight,
-
-    output wire lcd_clk,
-    output wire lcd_hsync,
-    output wire lcd_vsync,
-    output wire lcd_de,
-    output wire [4:0] lcd_r,
-    output wire [5:0] lcd_g,
-    output wire [4:0] lcd_b
+    output wire         hdmi_clk_n,
+    output wire         hdmi_clk_p,
+    output wire [2:0]   hdmi_data_n,
+    output wire [2:0]   hdmi_data_p
 );
 
     `include "common.vh"
 
-    assign lcd_clk = xtal_in;
+    wire clk;
+    wire clk_5x;
+    wire lock;
 
-    vga	vga
-    (
-        .clk(lcd_clk),
-
-        .hsync(stage0_hsync),
-        .vsync(stage0_vsync),
-        .de(stage0_de),
-
-        .row_first(stage0_row_first),
-        .row_start(stage0_row_start),
-        .row_index(),
-        .row_pixel(stage0_row_pixel),
-
-        .col_first(),
-        .col_start(stage0_col_start),
-        .col_index(stage0_col_index),
-        .col_pixel(stage0_col_pixel)
+    hdmi_clk hdmi_clk (
+        .xtal(xtal),
+        .clk(clk),
+        .clk_5x(clk_5x),
+        .lock(lock)
     );
 
-    wire stage0_hsync;
-    wire stage0_vsync;
-    wire stage0_de;
-    wire stage0_row_first;
-    wire stage0_row_start;
-    wire [4:0] stage0_row_pixel;
-    wire stage0_col_start;
-    wire [6:0] stage0_col_index;
-    wire [3:0] stage0_col_pixel;
+    wire        stage0_active;
+    wire        stage0_h_sync;
+    wire        stage0_v_sync;
+    wire        stage0_h_start;
+    wire        stage0_v_start;
 
-    always @(posedge lcd_clk) begin
-        stage1_hsync <= stage0_hsync;
-        stage1_vsync <= stage0_vsync;
-        stage1_de <= stage0_de;
-        if (stage0_row_first)
-            stage1_row_index <= 5'h0;
-        else if (stage0_row_start)
-            stage1_row_index <= stage1_row_index + 1'b1;
-        stage1_row_pixel <= stage0_row_pixel;
-        stage1_col_start <= stage0_col_start;
-        stage1_col_index <= stage0_col_index;
-    end
+    hdmi_timings hdmi_timings (
+        .clk(clk),
+        .reset_n(lock),
 
-    reg stage1_hsync;
-    reg stage1_vsync;
-    reg stage1_de;
-    reg [4:0] stage1_row_index;
-    reg [4:0] stage1_row_pixel;
-    reg stage1_col_start;
-    reg [6:0] stage1_col_index;
+        .active(stage0_active),
+        .h_sync(stage0_h_sync),
+        .v_sync(stage0_v_sync),
 
-    always @(posedge lcd_clk) begin
-        stage2_hsync <= stage1_hsync;
-        stage2_vsync <= stage1_vsync;
-        stage2_de <= stage1_de;
+        .h_start(stage0_h_start),
+        .v_start(stage0_v_start)
+    );
+
+    // STAGE 1 - 100 x 30 text display
+
+    wire        stage1_active;
+    wire        stage1_h_sync;
+    wire        stage1_v_sync;
+    wire [4:0]  stage1_row;
+    wire [4:0]  stage1_row_pixel;
+    wire [6:0]  stage1_col;
+    wire        stage1_col_start;
+    wire [3:0]  stage1_col_pixel;
+
+    text_timings text_timings (
+        .clk(clk),
+
+        .in_active(stage0_active),
+        .in_h_sync(stage0_h_sync),
+        .in_v_sync(stage0_v_sync),
+        .in_h_start(stage0_h_start),
+        .in_v_start(stage0_v_start),
+
+        .out_active(stage1_active),
+        .out_h_sync(stage1_h_sync),
+        .out_v_sync(stage1_v_sync),
+        .out_row(stage1_row),
+        .out_row_pixel(stage1_row_pixel),
+        .out_col(stage1_col),
+        .out_col_start(stage1_col_start),
+        .out_col_pixel(stage1_col_pixel)
+    );
+
+    // STAGE 2 - read char from VRAM at row,col
+
+    reg         stage2_active;
+    reg         stage2_h_sync;
+    reg         stage2_v_sync;
+    reg [4:0]   stage2_row_pixel;
+    reg         stage2_col_start;
+    reg [7:0]   stage2_char;
+
+    always @(posedge clk) begin
+        stage2_active <= stage1_active;
+        stage2_h_sync <= stage1_h_sync;
+        stage2_v_sync <= stage1_v_sync;
         stage2_row_pixel <= stage1_row_pixel;
         stage2_col_start <= stage1_col_start;
     end
 
     vram vram
     (
-        .clk(lcd_clk),
+        .clk(clk),
+
         .read_ce(stage1_col_start),
-        .read_row(stage1_row_index),
-        .read_col(stage1_col_index),
-        .read_data(stage2_char)
+        .read_row(stage1_row),
+        .read_col(stage1_col),
+        .read_data(stage2_char),
+
+        .write_ce(NO),
+        .write_row(5'b0),
+        .write_col(7'b0),
+        .write_data(8'b0)
     );
 
-    reg stage2_hsync;
-    reg stage2_vsync;
-    reg stage2_de;
-    reg [4:0] stage2_row_pixel;
-    reg stage2_col_start;
-    reg [7:0] stage2_char;
+    // get horizontal pixels for char
 
-    always @(posedge lcd_clk) begin
-        stage3_hsync <= stage2_hsync;
-        stage3_vsync <= stage2_vsync;
-        stage3_de <= stage2_de;
+    reg         stage3_h_sync;
+    reg         stage3_v_sync;
+    reg         stage3_active;
+    reg         stage3_col_start;
+    wire [9:0]  stage3_pixels;
+
+    always @(posedge clk) begin
+        stage3_active <= stage2_active;
+        stage3_h_sync <= stage2_h_sync;
+        stage3_v_sync <= stage2_v_sync;
         stage3_col_start <= stage2_col_start;
     end
 
-    // get horizontal pixels for char
     char_rom char_rom
     (
-        .clk(lcd_clk),
+        .clk(clk),
         .ce(stage2_col_start),
         .char(stage2_char),
         .row(stage2_row_pixel),
         .q(stage3_pixels)
     );
 
-    reg stage3_hsync;
-    reg stage3_vsync;
-    reg stage3_de;
-    reg stage3_col_start;
-    wire [9:0] stage3_pixels;
+    // STAGE 4 - shift out char pixels
 
-    always @(posedge lcd_clk) begin
-        stage4_hsync <= stage3_hsync;
-        stage4_vsync <= stage3_vsync;
-        stage4_de <= stage3_de;
+    reg         stage4_h_sync;
+    reg         stage4_v_sync;
+    reg         stage4_active;
+    reg [9:0]   stage4_pixels;
+    wire        stage4_pixel;
+
+    always @(posedge clk) begin
+        stage4_active <= stage3_active;
+        stage4_h_sync <= stage3_h_sync;
+        stage4_v_sync <= stage3_v_sync;
 
         // shift through char pixels
         if (stage3_col_start)
@@ -128,25 +145,23 @@ module top
             stage4_pixels <= {stage4_pixels[8:0], 1'b0};
     end
 
-    reg stage4_hsync;
-    reg stage4_vsync;
-    reg stage4_de;
-    reg [9:0] stage4_pixels;
-
-    // display pixel
-    wire stage4_pixel;
     assign stage4_pixel = stage4_pixels[9];
 
-    assign lcd_hsync = stage4_hsync;
-    assign lcd_vsync = stage4_vsync;
-    assign lcd_de = stage4_de;
+    hdmi_encode hdmi_encode (
+        .clk(clk),
+        .clk_5x(clk_5x),
+        .reset_n(lock),
 
-    // pixel colour
-    assign lcd_r = {{2{stage4_pixel}}, 3'b000};
-    assign lcd_g = {{2{stage4_pixel}}, 4'b0000};
-    assign lcd_b = {{2{stage4_pixel}}, 3'b000};
+        .active(stage4_active),
+        .h_sync(stage4_h_sync),
+        .v_sync(stage4_v_sync),
+        .rgb({3{stage4_pixel,7'b0}}),
 
-    assign lcd_backlight = button;
+        .hdmi_clk_n(hdmi_clk_n),
+        .hdmi_clk_p(hdmi_clk_p),
+        .hdmi_data_n(hdmi_data_n),
+        .hdmi_data_p(hdmi_data_p)
+    );
 
 endmodule
 
