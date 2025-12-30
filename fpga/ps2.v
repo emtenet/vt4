@@ -17,7 +17,11 @@ module ps2
     wire        ps2_clk;
     wire        ps2_data;
 
-    debouncer for_ps2_clk
+    debouncer
+    #(
+        .CYCLES(255)
+    )
+    for_ps2_clk
     (
         .clk(clk),
         .reset_low(reset_low),
@@ -26,7 +30,11 @@ module ps2
         .bit_out(ps2_clk)
     );
 
-    debouncer for_ps2_data
+    debouncer
+    #(
+        .CYCLES(255)
+    )
+    for_ps2_data
     (
         .clk(clk),
         .reset_low(reset_low),
@@ -70,7 +78,6 @@ module ps2
         end else if (ps2_clk_falling == YES) begin
             if (state == STATE_STOP-1) begin
                 state <= STATE_IDLE;
-                // rx_valid <= ps2_data;
                 rx_valid <= (shifter[0] == LOW) // START bit
                          && (parity == HIGH)    // ODD parity
                          && (ps2_data == HIGH); // STOP bit

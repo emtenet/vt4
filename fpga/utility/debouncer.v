@@ -13,7 +13,8 @@ module debouncer
 
     `include "common.vh"
 
-    localparam CYCLES_WIDTH = $clog2(CYCLES);
+    localparam CYCLES_WIDTH = (CYCLES == 0) ? 0 : $clog2(CYCLES);
+    localparam CYCLES_ZERO = {CYCLES_WIDTH{1'b0}};
 
     wire synced;
 
@@ -42,15 +43,15 @@ module debouncer
     reg [CYCLES_WIDTH-1:0] cycles;
 
     initial begin
-        cycles = 0;
+        cycles = CYCLES_ZERO;
         bit_out = LOW;
     end
 
     always @(posedge clk) begin
         if (reset_low == LOW) begin
-            cycles <= 0;
+            cycles <= CYCLES_ZERO;
             bit_out <= LOW;
-        end else if (cycles > 0) begin
+        end else if (cycles > CYCLES_ZERO) begin
             cycles <= cycles - 1;
         end else if (any_edge == YES) begin
             cycles <= CYCLES;
