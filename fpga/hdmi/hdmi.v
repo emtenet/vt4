@@ -90,9 +90,11 @@ module hdmi
     reg         stage2_col_start;
     reg [7:0]   stage2_char;
 
-    assign vram_ce = stage1_col_start;
-    assign vram_row = stage1_row;
-    assign vram_col = stage1_col;
+    always @(*) begin
+        vram_ce = stage1_col_start;
+        vram_row = stage1_row;
+        vram_col = stage1_col;
+    end
 
     always @(posedge clk) begin
         stage2_active <= stage1_active;
@@ -147,7 +149,9 @@ module hdmi
             stage4_pixels <= {stage4_pixels[8:0], 1'b0};
     end
 
-    assign stage4_pixel = stage4_pixels[9];
+    always @(*) begin
+        stage4_pixel = stage4_pixels[9];
+    end
 
     hdmi_encode hdmi_encode (
         .clk(clk),
