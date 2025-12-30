@@ -10,7 +10,10 @@ VERILOG=top.v \
   hdmi/hdmi_text_mode.v \
   hdmi/hdmi_timings.v \
   hdmi/hdmi_tmds.v \
+  ps2.v \
   utility/clock_synchronizer.v \
+  utility/debouncer.v \
+  utility/edge_detector.v \
   vram.v
 
 all: build/bitstream.fs

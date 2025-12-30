@@ -3,6 +3,11 @@ module top
 (
     input wire          xtal,
 
+    input wire          ps2_clk_pin,
+    input wire          ps2_data_pin,
+
+    output reg [5:0]    led,
+
     output wire         hdmi_clk_n,
     output wire         hdmi_clk_p,
     output wire [2:0]   hdmi_data_n,
@@ -27,7 +32,7 @@ module top
         .clk_5x(clk_5x),
         .reset_low(reset_low),
 
-        .top_row(0),
+        .top_row(5'd0),
 
         .vram_ce(vram_read_ce),
         .vram_row(vram_read_row),
@@ -54,6 +59,36 @@ module top
         .write_col(7'b0),
         .write_char("?")
     );
+
+    wire        ps2_valid;
+    wire [7:0]  ps2_data;
+
+    ps2 ps2
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .ps2_clk_pin(ps2_clk_pin),
+        .ps2_data_pin(ps2_data_pin),
+
+        .rx_ready(YES),
+        .rx_valid(ps2_valid),
+        .rx_data(ps2_data)
+    );
+
+    initial begin
+        led = ~6'b0;
+    end
+
+    always @(posedge clk) begin
+        if (reset_low == LOW) begin
+            led <= ~6'b0;
+        end else if (ps2_valid == YES) begin
+            led <= ~ps2_data[5:0];
+        end else begin
+            led <= led;
+        end
+    end
 
 endmodule
 
