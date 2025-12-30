@@ -8,7 +8,7 @@ module hdmi
 
     input wire [4:0]    top_row,
 
-    output wire         vram_ce,
+    output wire         vram_valid,
     output wire [4:0]   vram_row,
     output wire [6:0]   vram_col,
     input wire [7:0]    vram_char,
@@ -101,7 +101,7 @@ module hdmi
     reg [7:0]   stage2_char;
 
     always @(*) begin
-        vram_ce = stage1_col_start;
+        vram_valid = stage1_col_start;
         vram_row = stage1_row;
         vram_col = stage1_col;
     end
