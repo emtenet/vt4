@@ -20,8 +20,8 @@ build:
 build/synth.json: ${VERILOG} | build
 	yosys -p "read_verilog ${VERILOG}; synth_gowin -top top -json build/synth.json"
 
-build/pnr.json: build/synth.json | build
-	nextpnr-himbaechel --json build/synth.json --freq 27 --write build/pnr.json --device ${DEVICE} --vopt family=${FAMILY} --vopt cst=${BOARD}.cst
+build/pnr.json: build/synth.json top.cst | build
+	nextpnr-himbaechel --json build/synth.json --freq 27 --write build/pnr.json --device ${DEVICE} --vopt family=${FAMILY} --vopt cst=top.cst
 
 build/bitstream.fs: build/pnr.json | build
 	~/venv/bin/gowin_pack -d ${FAMILY} -o build/bitstream.fs build/pnr.json
