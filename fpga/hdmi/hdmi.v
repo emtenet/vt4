@@ -21,12 +21,22 @@ module hdmi
 
     `include "common.vh"
 
+    wire lock;
+
     hdmi_clk hdmi_clk
     (
         .xtal(xtal),
         .clk(clk),
         .clk_5x(clk_5x),
-        .lock(reset_low)
+        .lock(lock)
+    );
+
+    clock_synchronizer for_reset
+    (
+        .clk(clk),
+
+        .bit_in(lock),
+        .bit_out(reset_low)
     );
 
     wire        stage0_active;
