@@ -3,7 +3,7 @@ module hdmi_encode
 (
     input wire          clk,
     input wire          clk_5x,
-    input wire          reset_n,
+    input wire          reset_low,
 
     input wire          active,
     input wire          h_sync,
@@ -24,7 +24,7 @@ module hdmi_encode
 
     hdmi_tmds tmds_blue (
         .clk(clk),
-        .reset_n(reset_n),
+        .reset_low(reset_low),
 
         .active(active),
         .h_sync(h_sync),
@@ -39,7 +39,7 @@ module hdmi_encode
 
     hdmi_tmds tmds_green (
         .clk(clk),
-        .reset_n(reset_n),
+        .reset_low(reset_low),
 
         .active(active),
         .h_sync(NO),
@@ -54,7 +54,7 @@ module hdmi_encode
 
     hdmi_tmds tmds_red (
         .clk(clk),
-        .reset_n(reset_n),
+        .reset_low(reset_low),
 
         .active(active),
         .h_sync(NO),
@@ -81,7 +81,7 @@ module hdmi_encode
         .D9(tmds_9),
         .PCLK(clk),
         .FCLK(clk_5x),
-        .RESET(~reset_n)
+        .RESET(~reset_low)
     );
 
     ELVDS_OBUF tmds_buffer [3:0] (

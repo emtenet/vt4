@@ -1,5 +1,6 @@
 `default_nettype none
-module text_timings (
+module hdmi_text_mode
+(
     input wire          clk,
 
     input wire          in_active,
@@ -7,6 +8,8 @@ module text_timings (
     input wire          in_v_sync,
     input wire          in_h_start,
     input wire          in_v_start,
+
+    input wire [4:0]    top_row,
 
     output reg          out_active,
     output reg          out_h_sync,
@@ -19,6 +22,17 @@ module text_timings (
 );
 
     `include "common.vh"
+
+    initial begin
+        out_active = NO;
+        out_h_sync = NO;
+        out_v_sync = NO;
+        out_row = 0;
+        out_row_pixel = 0;
+        out_col = 0;
+        out_col_start = NO;
+        out_col_pixel = 0;
+    end
 
     always @(posedge clk) begin
         out_active <= in_active;
@@ -41,7 +55,7 @@ module text_timings (
 
             if (in_h_start) begin
                 if (in_v_start) begin
-                    out_row <= 0;
+                    out_row <= top_row;
                     out_row_pixel <= 0;
                 end else if (out_row_pixel == 5'd19) begin
                     out_row <= out_row + 1;

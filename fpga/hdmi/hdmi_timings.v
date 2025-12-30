@@ -2,7 +2,7 @@
 module hdmi_timings
 (
     input wire      clk,
-    input wire      reset_n,
+    input wire      reset_low,
 
     output reg      active,
     output reg      h_sync,
@@ -13,6 +13,15 @@ module hdmi_timings
 );
 
     `include "common.vh"
+
+    initial begin
+        active = NO;
+        h_sync = NO;
+        v_sync = NO;
+
+        h_start = NO;
+        v_start = NO;
+    end
 
     localparam  H_ACTIVE    = 1024;
     localparam  H_FRONT     = 48;
@@ -34,7 +43,7 @@ module hdmi_timings
     reg [V_BITS-1:0] v_index;
 
     always @(posedge clk) begin
-        if (reset_n == LOW) begin
+        if (reset_low == LOW) begin
             active <= NO;
             h_sync <= NO;
             v_sync <= NO;

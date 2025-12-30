@@ -4,11 +4,12 @@ DEVICE=GW1NR-LV9QN88PC6/I5
 
 VERILOG=top.v \
   char_rom.v \
+  hdmi/hdmi.v \
   hdmi/hdmi_clk.v \
   hdmi/hdmi_encode.v \
+  hdmi/hdmi_text_mode.v \
   hdmi/hdmi_timings.v \
   hdmi/hdmi_tmds.v \
-  text_timings.v \
   vram.v
 
 all: build/bitstream.fs

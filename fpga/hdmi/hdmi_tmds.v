@@ -21,7 +21,7 @@
 
 module hdmi_tmds (
 	input wire 			clk,
-	input wire			reset_n,
+	input wire			reset_low,
 
 	input wire			active,
 	input wire			h_sync,
@@ -64,7 +64,7 @@ module hdmi_tmds (
 	reg [8:0] q_m;
 
 	always @(posedge clk) begin
-		if (reset_n == 1'b0) begin
+		if (reset_low == 1'b0) begin
 			cnt   <= 0; // Data stream disparity count used for DC balance
 			q_out <= 0;
 		end else if (active == 1'b0) begin
