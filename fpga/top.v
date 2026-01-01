@@ -7,7 +7,7 @@ module top
     input wire          ps2_data_pin,
 
     input wire          button,
-    output reg [5:0]    led,
+    output wire [5:0]   led,
 
     output wire         hdmi_clk_n,
     output wire         hdmi_clk_p,
@@ -31,6 +31,7 @@ module top
     reg [4:0]   vram_write_row;
     reg [6:0]   vram_write_col;
     wire [7:0]  vram_write_char;
+    wire        ps2_error;
 
     hdmi hdmi
     (
@@ -78,11 +79,14 @@ module top
 
         .rx_ready(vram_write_ready),
         .rx_valid(vram_write_valid),
+        .rx_error(ps2_error),
         .rx_data(vram_write_char)
     );
 
+    reg [1:0] ps2_counter;
+
     initial begin
-        led = ~6'b0;
+        ps2_counter = 2'b0;
         vram_write_row = 5'b0;
         vram_write_col = 7'b0;
     end
@@ -91,11 +95,11 @@ module top
         if (reset_low == LOW) begin
             vram_write_row <= 5'b0;
             vram_write_col <= 7'b0;
-            led <= ~6'b0;
+            ps2_counter = 2'b0;
         end else if (button == LOW) begin
-            led <= ~6'b0;
+            ps2_counter = 2'b0;
         end else if (vram_write_valid == YES) begin
-            led <= ~vram_write_char[5:0];
+            ps2_counter <= ps2_counter + 1;
             if (vram_write_ready == YES) begin
                 vram_write_col <= vram_write_col + 1;
                 if (vram_write_col == 7'd99) begin
@@ -105,6 +109,8 @@ module top
             end
         end
     end
+
+    assign led = ~{ps2_error, 3'b0, ps2_counter};
 
 endmodule
 

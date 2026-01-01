@@ -9,6 +9,7 @@ module ps2
 
     input   wire        rx_ready,
     output  reg         rx_valid,
+    output  reg         rx_error,
     output  wire [7:0]  rx_data
 );
 
@@ -55,19 +56,33 @@ module ps2
         .neg_edge(ps2_clk_falling)
     );
 
-    localparam STATE_IDLE   = 4'd0;
-    localparam STATE_START  = 4'd1;
-    localparam STATE_STOP   = 4'd11;
+    localparam STATE_IDLE   = 4'd0; // START
+    localparam STATE_BIT_0  = 4'd1;
+    localparam STATE_BIT_1  = 4'd2;
+    localparam STATE_BIT_1  = 4'd3;
+    localparam STATE_BIT_1  = 4'd4;
+    localparam STATE_BIT_1  = 4'd5;
+    localparam STATE_BIT_1  = 4'd6;
+    localparam STATE_BIT_1  = 4'd7;
+    localparam STATE_BIT_1  = 4'd8;
+    localparam STATE_PARITY = 4'd9;
+    localparam STATE_STOP   = 4'd10;
     reg [3:0] state;
     reg [9:0] shifter;
     reg parity;
+    wire valid_p2s_frame;
 
     initial begin
         state = STATE_IDLE;
         shifter = 0;
         parity = LOW;
         rx_valid = NO;
+        rx_error = NO;
     end
+
+    assign valid_p2s_frame = (shifter[0] == LOW) // START bit
+                          && (parity == HIGH)    // ODD parity
+                          && (ps2_data == HIGH); // STOP bit
 
     always @(posedge clk) begin
         if (reset_low == LOW) begin
@@ -75,12 +90,12 @@ module ps2
             shifter <= 0;
             parity <= LOW;
             rx_valid <= NO;
+            rx_error <= NO;
         end else if (ps2_clk_falling == YES) begin
-            if (state == STATE_STOP-1) begin
+            if (state == STATE_STOP) begin
                 state <= STATE_IDLE;
-                rx_valid <= (shifter[0] == LOW) // START bit
-                         && (parity == HIGH)    // ODD parity
-                         && (ps2_data == HIGH); // STOP bit
+                rx_valid <= valid_p2s_frame;
+                rx_error <= ~valid_p2s_frame;
             end else begin
                 state <= state + 1;
                 rx_valid <= NO;
