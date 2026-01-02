@@ -2,12 +2,14 @@
 module top
 (
     input wire          xtal,
+    input wire          reset_low,
 
-    input wire          ps2_clk_pin,
-    input wire          ps2_data_pin,
+    inout wire          ps2_clk_pin,
+    inout wire          ps2_data_pin,
 
     input wire          button,
     output wire [5:0]   led,
+    output wire [3:0]   diagnosis,
 
     output wire         hdmi_clk_n,
     output wire         hdmi_clk_p,
@@ -19,8 +21,9 @@ module top
 
     wire        clk;
     wire        clk_5x;
-    wire        reset_low;
+    wire        clk_reset;
 
+    wire        vram_read_ready;
     wire        vram_read_valid;
     wire [4:0]  vram_read_row;
     wire [6:0]  vram_read_col;
@@ -32,13 +35,14 @@ module top
     reg [6:0]   vram_write_col;
     wire [7:0]  vram_write_char;
     wire        ps2_error;
+    wire [1:0]  ps2_state;
 
     hdmi hdmi
     (
         .xtal(xtal),
         .clk(clk),
         .clk_5x(clk_5x),
-        .reset_low(reset_low),
+        .reset_low(clk_reset),
 
         .top_row(5'd0),
 
@@ -57,6 +61,7 @@ module top
     (
         .clk(clk),
 
+        .read_ready(vram_read_ready),
         .read_valid(vram_read_valid),
         .read_row(vram_read_row),
         .read_col(vram_read_col),
@@ -69,19 +74,68 @@ module top
         .write_char(vram_write_char)
     );
 
+    wire    ps2_clk_in;
+    wire    ps2_clk_out;
+    wire    ps2_clk_oe;
+
+    IOBUF ps2_clk
+    (
+        .IO(ps2_clk_pin),
+
+        .I(ps2_clk_out),
+        .O(ps2_clk_in),
+        .OEN(~ps2_clk_oe)
+    );
+
+    wire    ps2_data_in;
+    wire    ps2_data_out;
+    wire    ps2_data_oe;
+
+    IOBUF ps2_data
+    (
+        .IO(ps2_data_pin),
+
+        .I(ps2_data_out),
+        .O(ps2_data_in),
+        .OEN(~ps2_data_oe)
+    );
+
+    wire    command_ready;
+    wire    command_valid;
+
+    button_handshake for_button
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .button(button),
+
+        .ready(command_ready),
+        .valid(command_valid)
+    );
+
     ps2 ps2
     (
         .clk(clk),
-        .reset_low(button), //reset_low),
+        .reset_low(reset_low),
 
-        .ps2_clk_pin(ps2_clk_pin),
-        .ps2_data_pin(ps2_data_pin),
+        .ps2_clk_in(ps2_clk_in),
+        .ps2_clk_out(ps2_clk_out),
+        .ps2_clk_oe(ps2_clk_oe),
+        .ps2_data_in(ps2_data_in),
+        .ps2_data_out(ps2_data_out),
+        .ps2_data_oe(ps2_data_oe),
 
-        .frame_error(ps2_error),
+        .diagnosis_state(ps2_state),
+        .error(ps2_error),
+
+        .command_ready(command_ready),
+        .command_valid(command_valid),
+        .command_data(8'hFF),
 
         .scan_code_ready(vram_write_ready),
         .scan_code_valid(vram_write_valid),
-        .scan_code(vram_write_char)
+        .scan_code_data(vram_write_char)
     );
 
     reg [1:0] ps2_counter;
@@ -97,8 +151,6 @@ module top
             vram_write_row <= 5'b0;
             vram_write_col <= 7'b0;
             ps2_counter = 2'b0;
-        end else if (button == LOW) begin
-            ps2_counter = 2'b0;
         end else if (vram_write_valid == YES) begin
             ps2_counter <= ps2_counter + 1;
             if (vram_write_ready == YES) begin
@@ -112,6 +164,8 @@ module top
     end
 
     assign led = ~{ps2_error, 3'b0, ps2_counter};
+
+    assign diagnosis = {ps2_state, ps2_error, command_valid};
 
 endmodule
 

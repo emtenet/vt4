@@ -29,6 +29,7 @@ module debouncer
     wire pos_edge;
     wire any_edge;
 
+    /* verilator lint_off PINMISSING */
     edge_detector on_synced
     (
         .clk(clk),
@@ -39,6 +40,7 @@ module debouncer
         .pos_edge(pos_edge),
         .any_edge(any_edge)
     );
+    /* verilator lint_on PINMISSING */
 
     reg [CYCLES_WIDTH-1:0] cycles;
 

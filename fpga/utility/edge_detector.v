@@ -6,9 +6,9 @@ module edge_detector
 
     input   wire        level,
 
-    output  wire        pos_edge,
-    output  wire        neg_edge,
-    output  wire        any_edge
+    output  reg         pos_edge,
+    output  reg         neg_edge,
+    output  reg         any_edge
 );
 
     `include "common.vh"
@@ -17,7 +17,7 @@ module edge_detector
 
     always @(posedge clk) begin
         if (reset_low == LOW) begin
-            previous = LOW;
+            previous <= LOW;
         end else begin
             previous <= level;
         end

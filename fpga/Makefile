@@ -12,6 +12,7 @@ VERILOG=top.v \
   hdmi/hdmi_tmds.v \
   ps2.v \
   utility/clock_synchronizer.v \
+  utility/button_handshake.v \
   utility/debouncer.v \
   utility/edge_detector.v \
   vram.v
@@ -36,5 +37,8 @@ sram: build/bitstream.fs
 flash: build/bitstream.fs
 	sudo openFPGALoader -b ${BOARD} build/bitstream.fs -f
 
-.PHONY: all sram flash
+lint: ${VERILOG}
+	verilator -lint-only -Wall ${VERILOG}
+
+.PHONY: all sram flash lint
 INTERMEDIATE: build/synth.json build/pnr.json

@@ -4,22 +4,22 @@ module clock_synchronizer
     parameter EXTRA_DEPTH = 0
 )
 (
-    input   wire        clk,
+    input   wire       clk,
 
-    input   wire        bit_in,
-    output  wire		bit_out
+    input   wire       bit_in,
+    output  reg        bit_out
 );
 
-	localparam DEPTH = 2 + EXTRA_DEPTH;
+    localparam DEPTH = 2 + EXTRA_DEPTH;
 
-	reg [DEPTH-1:0] synchronizer;
+    reg [DEPTH-1:0] synchronizer;
 
     initial begin
-    	synchronizer = {DEPTH{0}};
+        synchronizer = {DEPTH{1'b0}};
     end
 
     always @(posedge clk) begin
-    	synchronizer <= {synchronizer[DEPTH-2:0], bit_in};
+        synchronizer <= {synchronizer[DEPTH-2:0], bit_in};
     end
 
     always @(*) begin

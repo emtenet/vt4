@@ -45,6 +45,15 @@ IO_LOC "uart_rx" 18;
 IO_PORT "uart_rx" IO_TYPE=LVCMOS33;
 //
 IO_LOC "ps2_clk_pin" 37;
-IO_PORT "ps2_clk_pin" IO_TYPE=LVCMOS33;
+IO_PORT "ps2_clk_pin" IO_TYPE=LVCMOS33 PULL_MODE=NONE OPEN_DRAIN=ON;
 IO_LOC "ps2_data_pin" 38;
-IO_PORT "ps2_data_pin" IO_TYPE=LVCMOS33;
+IO_PORT "ps2_data_pin" IO_TYPE=LVCMOS33 PULL_MODE=NONE OPEN_DRAIN=ON;
+//
+IO_LOC "diagnosis[3]" 36;
+IO_PORT "diagnosis[3]" IO_TYPE=LVCMOS33;
+IO_LOC "diagnosis[2]" 39;
+IO_PORT "diagnosis[2]" IO_TYPE=LVCMOS33;
+IO_LOC "diagnosis[1]" 25;
+IO_PORT "diagnosis[1]" IO_TYPE=LVCMOS33;
+IO_LOC "diagnosis[0]" 26;
+IO_PORT "diagnosis[0]" IO_TYPE=LVCMOS33;
