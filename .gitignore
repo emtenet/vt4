@@ -1,6 +1,6 @@
 char-rom-gen/target
 fpga/build
-fpga/char_rom.v
-fpga/vram.v
+fpga/src/char_rom.v
+fpga/src/vram.v
 vram-gen/init.txt
 vram-gen/target

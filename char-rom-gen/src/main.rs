@@ -73,7 +73,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut verilog = String::with_capacity(30000);
     char_rom(&font, &mut verilog);
-    std::fs::write("../fpga/char_rom.v", &verilog)?;
+    std::fs::write("../fpga/src/char_rom.v", &verilog)?;
 
     Ok(())
 }

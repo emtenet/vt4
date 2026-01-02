@@ -133,7 +133,7 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("    );\n");
     verilog.push_str("\n");
     verilog.push_str("endmodule\n");
-    std::fs::write("../fpga/vram.v", &verilog)?;
+    std::fs::write("../fpga/src/vram.v", &verilog)?;
 
     Ok(())
 }

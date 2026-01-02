@@ -2,20 +2,20 @@ BOARD=tangnano9k
 FAMILY=GW1N-9C
 DEVICE=GW1NR-LV9QN88PC6/I5
 
-VERILOG=top.v \
-  char_rom.v \
-  hdmi/hdmi.v \
-  hdmi/hdmi_clk.v \
-  hdmi/hdmi_encode.v \
-  hdmi/hdmi_text_mode.v \
-  hdmi/hdmi_timings.v \
-  hdmi/hdmi_tmds.v \
-  ps2.v \
-  utility/clock_synchronizer.v \
-  utility/button_handshake.v \
-  utility/debouncer.v \
-  utility/edge_detector.v \
-  vram.v
+VERILOG=src/top.v \
+src/button_handshake.v \
+src/char_rom.v \
+src/clock_synchronizer.v \
+src/debouncer.v \
+src/edge_detector.v \
+src/hdmi.v \
+src/hdmi_clk.v \
+src/hdmi_encode.v \
+src/hdmi_text_mode.v \
+src/hdmi_timings.v \
+src/hdmi_tmds.v \
+src/ps2.v \
+src/vram.v
 
 all: build/bitstream.fs
 
