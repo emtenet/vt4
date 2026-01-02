@@ -89,34 +89,29 @@ fn char_rom(font: &bdf::Font, verilog: &mut String) {
     verilog.push_str("    output wire [9:0] q\n");
     verilog.push_str(");\n");
     verilog.push_str("\n");
-    verilog.push_str("reg [1:0] block;\n");
+    verilog.push_str("    reg [1:0] block;\n");
     verilog.push_str("\n");
-    verilog.push_str("always @(posedge clk) begin\n");
-    verilog.push_str("    if (ce) begin\n");
-    verilog.push_str("        block <= row[3:2];\n");
+    verilog.push_str("    always @(posedge clk) begin\n");
+    verilog.push_str("        if (ce) begin\n");
+    verilog.push_str("            block <= row[3:2];\n");
+    verilog.push_str("        end\n");
     verilog.push_str("    end\n");
-    verilog.push_str("end\n");
     verilog.push_str("\n");
-    verilog.push_str("wire [31:0] block_0_q;\n");
-    verilog.push_str("wire [31:0] block_1_q;\n");
-    verilog.push_str("wire [31:0] block_2_q;\n");
-    verilog.push_str("wire [31:0] block_3_q;\n");
+    verilog.push_str("    wire [31:0] block_0_q;\n");
+    verilog.push_str("    wire [31:0] block_1_q;\n");
+    verilog.push_str("    wire [31:0] block_2_q;\n");
+    verilog.push_str("    wire [31:0] block_3_q;\n");
     verilog.push_str("\n");
-    verilog.push_str("pROM block_0 (\n");
-    verilog.push_str("    .DO(block_0_q),\n");
-    verilog.push_str("    .CLK(clk),\n");
-    verilog.push_str("    .OCE(1'b1),\n");
-    verilog.push_str("    .CE(ce & ~row[4] & ~row[3]),\n");
-    verilog.push_str("    .RESET(1'b0),\n");
-    verilog.push_str("    .AD({row[2:0],char[7:0],3'b000})\n");
-    verilog.push_str(");\n");
-    verilog.push_str("defparam block_0.READ_MODE = 1'b0;\n");
-    verilog.push_str("defparam block_0.BIT_WIDTH = 8;\n");
-    verilog.push_str("defparam block_0.RESET_MODE = \"SYNC\";\n");
+    verilog.push_str("    pROM\n");
+    verilog.push_str("    #(\n");
+    verilog.push_str("        .READ_MODE(1'b0),\n");
+    verilog.push_str("        .BIT_WIDTH(8),\n");
+    verilog.push_str("        .RESET_MODE(\"SYNC\"");
     for row in 0..8 {
         for upper in 0..8 {
+            verilog.push_str("),\n");
             let init = (row * 8) + upper;
-            let mut line = format!("defparam block_0.INIT_RAM_{init:02X} = 256'h");
+            let mut line = format!("        .INIT_RAM_{init:02X}(256'h");
             line.reserve(110);
             for lower in (0..32).rev() {
                 let glyph = (upper * 32) + lower;
@@ -125,26 +120,31 @@ fn char_rom(font: &bdf::Font, verilog: &mut String) {
                 line.push(char::from_digit(((row >> 4) & 15) as u32, 16).expect("hex"));
                 line.push(char::from_digit(((row >> 0) & 15) as u32, 16).expect("hex"));
             }
-            line.push_str(";\n");
             verilog.push_str(&line);
         }
     }
+    verilog.push_str(")\n");
+    verilog.push_str("    )\n");
+    verilog.push_str("    block_0\n");
+    verilog.push_str("    (\n");
+    verilog.push_str("        .DO(block_0_q),\n");
+    verilog.push_str("        .CLK(clk),\n");
+    verilog.push_str("        .OCE(1'b1),\n");
+    verilog.push_str("        .CE(ce & ~row[4] & ~row[3]),\n");
+    verilog.push_str("        .RESET(1'b0),\n");
+    verilog.push_str("        .AD({row[2:0],char[7:0],3'b000})\n");
+    verilog.push_str("    );\n");
     verilog.push_str("\n");
-    verilog.push_str("pROM block_1 (\n");
-    verilog.push_str("    .DO(block_1_q),\n");
-    verilog.push_str("    .CLK(clk),\n");
-    verilog.push_str("    .OCE(1'b1),\n");
-    verilog.push_str("    .CE(ce & ~row[4] & row[3]),\n");
-    verilog.push_str("    .RESET(1'b0),\n");
-    verilog.push_str("    .AD({row[2:0],char[7:0],3'b000})\n");
-    verilog.push_str(");\n");
-    verilog.push_str("defparam block_1.READ_MODE = 1'b0;\n");
-    verilog.push_str("defparam block_1.BIT_WIDTH = 8;\n");
-    verilog.push_str("defparam block_1.RESET_MODE = \"SYNC\";\n");
+    verilog.push_str("    pROM\n");
+    verilog.push_str("    #(\n");
+    verilog.push_str("        .READ_MODE(1'b0),\n");
+    verilog.push_str("        .BIT_WIDTH(8),\n");
+    verilog.push_str("        .RESET_MODE(\"SYNC\"");
     for row in 8..16 {
         for upper in 0..8 {
+            verilog.push_str("),\n");
             let init = ((row * 8) + upper) & 63;
-            let mut line = format!("defparam block_1.INIT_RAM_{init:02X} = 256'h");
+            let mut line = format!("        .INIT_RAM_{init:02X}(256'h");
             line.reserve(110);
             for lower in (0..32).rev() {
                 let glyph = (upper * 32) + lower;
@@ -153,26 +153,31 @@ fn char_rom(font: &bdf::Font, verilog: &mut String) {
                 line.push(char::from_digit(((row >> 4) & 15) as u32, 16).expect("hex"));
                 line.push(char::from_digit(((row >> 0) & 15) as u32, 16).expect("hex"));
             }
-            line.push_str(";\n");
             verilog.push_str(&line);
         }
     }
+    verilog.push_str(")\n");
+    verilog.push_str("    )\n");
+    verilog.push_str("    block_1\n");
+    verilog.push_str("    (\n");
+    verilog.push_str("        .DO(block_1_q),\n");
+    verilog.push_str("        .CLK(clk),\n");
+    verilog.push_str("        .OCE(1'b1),\n");
+    verilog.push_str("        .CE(ce & ~row[4] & row[3]),\n");
+    verilog.push_str("        .RESET(1'b0),\n");
+    verilog.push_str("        .AD({row[2:0],char[7:0],3'b000})\n");
+    verilog.push_str("    );\n");
     verilog.push_str("\n");
-    verilog.push_str("pROM block_2 (\n");
-    verilog.push_str("    .DO(block_2_q),\n");
-    verilog.push_str("    .CLK(clk),\n");
-    verilog.push_str("    .OCE(1'b1),\n");
-    verilog.push_str("    .CE(ce & row[4] & ~row[3]),\n");
-    verilog.push_str("    .RESET(1'b0),\n");
-    verilog.push_str("    .AD({row[2:0],char[7:0],3'b000})\n");
-    verilog.push_str(");\n");
-    verilog.push_str("defparam block_2.READ_MODE = 1'b0;\n");
-    verilog.push_str("defparam block_2.BIT_WIDTH = 8;\n");
-    verilog.push_str("defparam block_2.RESET_MODE = \"SYNC\";\n");
+    verilog.push_str("    pROM\n");
+    verilog.push_str("    #(\n");
+    verilog.push_str("        .READ_MODE(1'b0),\n");
+    verilog.push_str("        .BIT_WIDTH(8),\n");
+    verilog.push_str("        .RESET_MODE(\"SYNC\"");
     for row in 16..20 {
         for upper in 0..8 {
+            verilog.push_str("),\n");
             let init = ((row * 8) + upper) & 63;
-            let mut line = format!("defparam block_2.INIT_RAM_{init:02X} = 256'h");
+            let mut line = format!("        .INIT_RAM_{init:02X}(256'h");
             line.reserve(110);
             for lower in (0..32).rev() {
                 let glyph = (upper * 32) + lower;
@@ -181,26 +186,31 @@ fn char_rom(font: &bdf::Font, verilog: &mut String) {
                 line.push(char::from_digit(((row >> 4) & 15) as u32, 16).expect("hex"));
                 line.push(char::from_digit(((row >> 0) & 15) as u32, 16).expect("hex"));
             }
-            line.push_str(";\n");
             verilog.push_str(&line);
         }
     }
+    verilog.push_str(")\n");
+    verilog.push_str("    )\n");
+    verilog.push_str("    block_2\n");
+    verilog.push_str("    (\n");
+    verilog.push_str("        .DO(block_2_q),\n");
+    verilog.push_str("        .CLK(clk),\n");
+    verilog.push_str("        .OCE(1'b1),\n");
+    verilog.push_str("        .CE(ce & row[4] & ~row[3]),\n");
+    verilog.push_str("        .RESET(1'b0),\n");
+    verilog.push_str("        .AD({row[2:0],char[7:0],3'b000})\n");
+    verilog.push_str("    );\n");
     verilog.push_str("\n");
-    verilog.push_str("pROM block_3 (\n");
-    verilog.push_str("    .DO(block_3_q),\n");
-    verilog.push_str("    .CLK(clk),\n");
-    verilog.push_str("    .OCE(1'b1),\n");
-    verilog.push_str("    .CE(ce),\n");
-    verilog.push_str("    .RESET(1'b0),\n");
-    verilog.push_str("    .AD({row[4:0],char[7:0],1'b0})\n");
-    verilog.push_str(");\n");
-    verilog.push_str("defparam block_3.READ_MODE = 1'b0;\n");
-    verilog.push_str("defparam block_3.BIT_WIDTH = 2;\n");
-    verilog.push_str("defparam block_3.RESET_MODE = \"SYNC\";\n");
+    verilog.push_str("    pROM\n");
+    verilog.push_str("    #(\n");
+    verilog.push_str("        .READ_MODE(1'b0),\n");
+    verilog.push_str("        .BIT_WIDTH(2),\n");
+    verilog.push_str("        .RESET_MODE(\"SYNC\"");
     for row in 0..20 {
         for upper in 0..2 {
+            verilog.push_str("),\n");
             let init = (row * 2) + upper;
-            let mut line = format!("defparam block_3.INIT_RAM_{init:02X} = 256'h");
+            let mut line = format!("        .INIT_RAM_{init:02X}(256'h");
             line.reserve(110);
             let mut digit = 0u32;
             for lower in (0..128).rev() {
@@ -214,10 +224,20 @@ fn char_rom(font: &bdf::Font, verilog: &mut String) {
                     line.push(char::from_digit(digit, 16).expect("hex"));
                 }
             }
-            line.push_str(";\n");
             verilog.push_str(&line);
         }
     }
+    verilog.push_str(")\n");
+    verilog.push_str("    )\n");
+    verilog.push_str("    block_3\n");
+    verilog.push_str("    (\n");
+    verilog.push_str("        .DO(block_3_q),\n");
+    verilog.push_str("        .CLK(clk),\n");
+    verilog.push_str("        .OCE(1'b1),\n");
+    verilog.push_str("        .CE(ce),\n");
+    verilog.push_str("        .RESET(1'b0),\n");
+    verilog.push_str("        .AD({row[4:0],char[7:0],1'b0})\n");
+    verilog.push_str("    );\n");
     verilog.push_str("\n");
     verilog.push_str("assign q = row[4]\n");
     verilog.push_str("        ? (row[3]\n");
