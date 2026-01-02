@@ -77,10 +77,11 @@ module top
         .ps2_clk_pin(ps2_clk_pin),
         .ps2_data_pin(ps2_data_pin),
 
-        .rx_ready(vram_write_ready),
-        .rx_valid(vram_write_valid),
-        .rx_error(ps2_error),
-        .rx_data(vram_write_char)
+        .frame_error(ps2_error),
+
+        .scan_code_ready(vram_write_ready),
+        .scan_code_valid(vram_write_valid),
+        .scan_code(vram_write_char)
     );
 
     reg [1:0] ps2_counter;

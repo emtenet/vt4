@@ -7,16 +7,16 @@ module ps2
     input   wire        ps2_clk_pin,
     input   wire        ps2_data_pin,
 
-    input   wire        rx_ready,
-    output  reg         rx_valid,
-    output  reg         rx_error,
-    output  wire [7:0]  rx_data
+    output  reg         frame_error,
+
+    input   wire        scan_code_ready,
+    output  reg         scan_code_valid,
+    output  reg [7:0]   scan_code
 );
 
     `include "common.vh"
 
     wire        ps2_clk;
-    wire        ps2_data;
 
     debouncer
     #(
@@ -30,6 +30,8 @@ module ps2
         .bit_in(ps2_clk_pin),
         .bit_out(ps2_clk)
     );
+
+    wire        ps2_data;
 
     debouncer
     #(
@@ -56,66 +58,98 @@ module ps2
         .neg_edge(ps2_clk_falling)
     );
 
-    localparam STATE_IDLE   = 4'd0; // START
-    localparam STATE_BIT_0  = 4'd1;
-    localparam STATE_BIT_1  = 4'd2;
-    localparam STATE_BIT_1  = 4'd3;
-    localparam STATE_BIT_1  = 4'd4;
-    localparam STATE_BIT_1  = 4'd5;
-    localparam STATE_BIT_1  = 4'd6;
-    localparam STATE_BIT_1  = 4'd7;
-    localparam STATE_BIT_1  = 4'd8;
-    localparam STATE_PARITY = 4'd9;
-    localparam STATE_STOP   = 4'd10;
-    reg [3:0] state;
-    reg [9:0] shifter;
+    localparam STATE_IDLE   = 1'd0;
+    localparam STATE_RX     = 1'd1;
+
+    localparam FRAME_BIT_0  = 4'd0;
+    localparam FRAME_BIT_1  = 4'd1;
+    localparam FRAME_BIT_1  = 4'd2;
+    localparam FRAME_BIT_1  = 4'd3;
+    localparam FRAME_BIT_1  = 4'd4;
+    localparam FRAME_BIT_1  = 4'd5;
+    localparam FRAME_BIT_1  = 4'd6;
+    localparam FRAME_BIT_1  = 4'd7;
+    localparam FRAME_PARITY = 4'd8;
+    localparam FRAME_STOP   = 4'd9;
+    reg state;
+    reg [3:0] frame;
     reg parity;
-    wire valid_p2s_frame;
+
+    // slowest frame @ 10kHz = 1100us
+    // is 56,980 cycles at 51.8MHz
+    // round up to 65,535 (16 bit counter)
+    reg [15:0] watchdog;
+    localparam WATCHDOG_START   = 16'b0;
+    localparam WATCHDOG_END     = 16'b1111_1111_1111_1111;
+
+    wire frame_is_valid;
+    assign frame_is_valid = (parity == HIGH)    // ODD parity
+                         && (ps2_data == HIGH); // STOP bit
 
     initial begin
         state = STATE_IDLE;
-        shifter = 0;
+        frame = FRAME_BIT_0;
         parity = LOW;
-        rx_valid = NO;
-        rx_error = NO;
+        scan_code_valid = NO;
+        scan_code = 8'b0;
+        frame_error = NO;
+        watchdog = WATCHDOG_START;
     end
-
-    assign valid_p2s_frame = (shifter[0] == LOW) // START bit
-                          && (parity == HIGH)    // ODD parity
-                          && (ps2_data == HIGH); // STOP bit
 
     always @(posedge clk) begin
-        if (reset_low == LOW) begin
-            state <= STATE_IDLE;
-            shifter <= 0;
-            parity <= LOW;
-            rx_valid <= NO;
-            rx_error <= NO;
-        end else if (ps2_clk_falling == YES) begin
-            if (state == STATE_STOP) begin
+        if (scan_code_valid == YES && scan_code_ready == YES) begin
+            scan_code_valid <= NO;
+        end
+
+        if (ps2_clk_falling == YES) begin
+            case (state)
+                STATE_IDLE: begin
+                    // START bit?
+                    if (ps2_data == LOW) begin
+                        state <= STATE_RX;
+                        frame <= FRAME_BIT_0;
+                        parity <= LOW;
+                        scan_code_valid <= NO;
+                        watchdog <= WATCHDOG_START;
+                    end
+                end
+                STATE_RX: begin
+                    frame <= frame + 1;
+                    case (frame)
+                        default: begin
+                            scan_code <= {ps2_data, scan_code[7:1]};
+                            parity <= parity ^ ps2_data;
+                        end
+                        FRAME_PARITY: begin
+                            parity <= parity ^ ps2_data;
+                        end
+                        FRAME_STOP: begin
+                            state <= STATE_IDLE;
+                            scan_code_valid <= frame_is_valid;
+                            frame_error <= ~frame_is_valid;
+                        end
+                    endcase
+                end
+            endcase
+        end
+
+        if (state == STATE_RX) begin
+            watchdog <= watchdog + 1;
+            if (watchdog == WATCHDOG_END) begin
                 state <= STATE_IDLE;
-                rx_valid <= valid_p2s_frame;
-                rx_error <= ~valid_p2s_frame;
-            end else begin
-                state <= state + 1;
-                rx_valid <= NO;
-            end
-            shifter <= {ps2_data, shifter[9:1]};
-            parity <= parity ^ ps2_data;
-        end else begin
-            state <= state;
-            shifter <= shifter;
-            parity <= parity;
-            if (rx_valid == YES && rx_ready == YES) begin
-                rx_valid <= NO;
-            end else begin
-                rx_valid <= rx_valid;
+                frame_error <= YES;
             end
         end
-    end
 
-    always @(*) begin
-        rx_data = shifter[7:0];
+        if (reset_low == LOW) begin
+            state <= STATE_IDLE;
+            frame <= FRAME_BIT_0;
+            parity <= LOW;
+            scan_code_valid <= NO;
+            scan_code <= 8'b0;
+            frame_error <= NO;
+            watchdog <= WATCHDOG_START;
+        end
     end
 
 endmodule
