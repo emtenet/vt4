@@ -10,8 +10,7 @@ public:
 void Simulation::simulation() {
 	// PS/2 frame (self test = AA)
 	ps2_cycle(0); // start
-	// cannot send commands whilst RECEIVING
-	assert(model->command_ready == 0);
+	ASSERT_command_BUSY("whilst RECEIVING");
 	ps2_cycle(0); // bit 0
 	ps2_cycle(1);
 	ps2_cycle(0);
@@ -19,23 +18,20 @@ void Simulation::simulation() {
 	ps2_cycle(0);
 	ps2_cycle(1);
 	ps2_cycle(0);
-	ps2_cycle(1); // bit 6
+	ps2_cycle(1); // bit 7
 	ps2_cycle(1); // parity (odd)
 	ps2_cycle(1); // stop
 
-	// scan_code VALID
-	assert(model->scan_code_valid == 1);
-	assert(model->scan_code_data == 0xAA);
+	ASSERT_scan_code_VALID();
+	ASSERT_scan_code_EQ(0xAA);
 
-	// can NOW send commands after RECEIVING
-	assert(model->command_ready == 1);
+	ASSERT_command_READY("after RECEIVING");
 
-	cycles(10000);
+	cycles(FOR_100_us);
 
 	model->scan_code_ready = 1;
 	cycle();
-	// scan_code HANDSHAKE
-	assert(model->scan_code_valid == 0);
+	ASSERT_scan_code_TAKEN("with handshake");
 }
 
 int main(int argc, char **argv) {
