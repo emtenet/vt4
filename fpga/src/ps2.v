@@ -232,7 +232,7 @@ module ps2
         end
     end
 
-    assign command_ready = (state == STATE_IDLE);
+    assign command_ready = (state == STATE_IDLE) && (reset_low == HIGH);
     assign scan_code_data = scan_code;
 
     assign ps2_clk_oe = (state == STATE_TX)
