@@ -79,8 +79,8 @@ SimulationBase::~SimulationBase() {
 	ASSERT_EQ("host RELEASED data " msg, model->ps2_data_oe, 0)
 #define ASSERT_scan_code_VALID(msg) \
 	ASSERT_EQ("scan code is VALID " msg, model->scan_code_valid, 1)
-#define ASSERT_scan_code_EQ(scan_code) \
-	ASSERT_EQ("scan code EXPECTED", model->scan_code_data, scan_code)
+#define ASSERT_scan_code_IS(msg, scan_code) \
+	ASSERT_EQ("scan code IS " msg, model->scan_code_data, scan_code)
 #define ASSERT_scan_code_TAKEN(msg) \
 	ASSERT_EQ("scan code TAKEN " msg, model->scan_code_valid, 0)
 
@@ -90,8 +90,6 @@ void SimulationBase::assert_eq(const char* message, int lhs, int rhs, const char
 	printf("    %s\n", expr);
 	printf("    LHS = %d\n", lhs);
 	printf("    RHS = %d\n", rhs);
-
-	cycles(FOR_100_us);
 
 	cycle_final();
 

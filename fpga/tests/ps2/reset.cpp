@@ -14,6 +14,8 @@ void Simulation::simulation() {
 	model->command_valid = 1;
 	cycle();
 	ASSERT_command_BUSY("until this one completes");
+	model->command_data = 0;
+	model->command_valid = 0;
 
 	// Host to Keyboard request with CLK pulled LOW
 	ASSERT_clk_DRIVEN("for REQUEST to send");
@@ -45,7 +47,7 @@ void Simulation::simulation() {
 	CData command = 0;
 	CData parity = 0;
 
-	for (int bits = 0; bits < 10; bits++) {
+	for (int bits = 0; bits < 8; bits++) {
 		// DATA bit
 		ps2_cycle();
 		ASSERT_data_DRIVEN("for DATA bits");
@@ -54,18 +56,24 @@ void Simulation::simulation() {
 		parity ^= bit;
 	}
 
+	ASSERT_EQ("sent RESET", command, 0xFF);
+
 	// PARITY bit
 	ps2_cycle();
 	ASSERT_data_DRIVEN("for PARITY bit");
 	CData bit = model->ps2_data_out & 1;
 	parity ^= bit;
 
+	ASSERT_EQ("parity is ODD", parity, 1);
+
 	// STOP bit
 	ps2_cycle();
 	ASSERT_data_RELEASED("for STOP bit");
 
 	// ACK bit
-	ps2_cycle(1);
+	ps2_cycle(0);
+	model->ps2_data_in = 1;
+	cycle();
 
 	ASSERT_command_READY("after SENDING");
 
@@ -85,8 +93,8 @@ void Simulation::simulation() {
 	ps2_cycle(1); // parity (odd)
 	ps2_cycle(1); // stop
 
-	ASSERT_scan_code_VALID();
-	ASSERT_scan_code_EQ(0xFA);
+	ASSERT_scan_code_VALID("after RECEIVING");
+	ASSERT_scan_code_IS("acknowledge", 0xFA);
 
 	ASSERT_command_READY("after RECEIVING");
 
@@ -95,8 +103,9 @@ void Simulation::simulation() {
 	model->scan_code_ready = 1;
 	cycle();
 	ASSERT_scan_code_TAKEN("with handshake");
+	model->scan_code_ready = 0;
 
-	cycles(FOR_100_us);
+	cycles(FOR_1_ms);
 
 	// PS/2 frame (self test = AA)
 	ps2_cycle(0); // start
@@ -112,8 +121,8 @@ void Simulation::simulation() {
 	ps2_cycle(1); // parity (odd)
 	ps2_cycle(1); // stop
 
-	ASSERT_scan_code_VALID();
-	ASSERT_scan_code_EQ(0xAA);
+	ASSERT_scan_code_VALID("after RECEIVING");
+	ASSERT_scan_code_IS("self test", 0xAA);
 
 	ASSERT_command_READY("after RECEIVING");
 
@@ -122,6 +131,7 @@ void Simulation::simulation() {
 	model->scan_code_ready = 1;
 	cycle();
 	ASSERT_scan_code_TAKEN("with handshake");
+	model->scan_code_ready = 0;
 }
 
 int main(int argc, char **argv) {

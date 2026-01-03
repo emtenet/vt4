@@ -61,6 +61,7 @@ module ps2
         .bit_out(ps2_data)
     );
 
+    wire ps2_clk_rising;
     wire ps2_clk_falling;
 
     /* verilator lint_off PINMISSING */
@@ -71,6 +72,7 @@ module ps2
 
         .level(ps2_clk),
 
+        .pos_edge(ps2_clk_rising),
         .neg_edge(ps2_clk_falling)
     );
     /* verilator lint_on PINMISSING */
@@ -137,6 +139,7 @@ module ps2
     always @(posedge clk) begin
         if (scan_code_valid == YES && scan_code_ready == YES) begin
             scan_code_valid <= NO;
+            scan_code <= 8'b0;
         end
 
         case (state)
@@ -144,6 +147,7 @@ module ps2
                 if (command_valid == YES) begin
                     state <= STATE_TX;
                     frame <= FRAME_REQUEST;
+                    watchdog <= WATCHDOG_START;
                     request <= REQUEST_START;
                     command <= {command_parity, command_data, START_BIT};
                 end else if (ps2_clk_falling == YES) begin
@@ -151,9 +155,9 @@ module ps2
                     if (ps2_data == START_BIT) begin
                         state <= STATE_RX;
                         frame <= FRAME_BIT_0;
+                        watchdog <= WATCHDOG_START;
                         parity <= LOW;
                         scan_code_valid <= NO;
-                        watchdog <= WATCHDOG_START;
                     end
                 end
             end
@@ -171,11 +175,17 @@ module ps2
                             parity <= parity ^ ps2_data;
                         end
                         FRAME_STOP: begin
-                            state <= STATE_IDLE;
                             scan_code_valid <= scan_code_success;
                             error <= ~scan_code_success;
                         end
                     endcase
+                end
+
+                if (ps2_clk_rising == YES) begin
+                    if (frame == FRAME_ACK) begin
+                        state <= STATE_IDLE;
+                        frame <= FRAME_BIT_0;
+                    end
                 end
 
                 if (watchdog == WATCHDOG_STOP) begin
@@ -191,19 +201,21 @@ module ps2
                     if (request == REQUEST_STOP) begin
                         frame <= frame + 1;
                     end
+                end else if (frame == FRAME_ACK) begin
+                    if (ps2_clk_rising == YES) begin
+                        state <= STATE_IDLE;
+                        frame <= FRAME_BIT_0;
+                    end
                 end else begin
                     if (ps2_clk_falling == YES) begin
                         if (frame == FRAME_START) begin
                             watchdog <= WATCHDOG_START;
                         end
 
-                        if (frame != FRAME_REQUEST) begin
-                            frame <= frame + 1;
-                            command <= {STOP_BIT, command[9:1]};
-                        end
+                        frame <= frame + 1;
+                        command <= {STOP_BIT, command[9:1]};
 
-                        if (frame == FRAME_ACK) begin
-                            state <= STATE_IDLE;
+                        if (frame == FRAME_STOP) begin
                             error <= ~command_success;
                         end
                     end

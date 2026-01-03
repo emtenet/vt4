@@ -23,7 +23,7 @@ void Simulation::simulation() {
 	ps2_cycle(1); // stop
 
 	ASSERT_scan_code_VALID();
-	ASSERT_scan_code_EQ(0xAA);
+	ASSERT_scan_code_IS("self test", 0xAA);
 
 	ASSERT_command_READY("after RECEIVING");
 
@@ -32,6 +32,7 @@ void Simulation::simulation() {
 	model->scan_code_ready = 1;
 	cycle();
 	ASSERT_scan_code_TAKEN("with handshake");
+	model->scan_code_ready = 0;
 }
 
 int main(int argc, char **argv) {
