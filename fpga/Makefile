@@ -5,6 +5,7 @@ DEVICE=GW1NR-LV9QN88PC6/I5
 VERILOG=src/top.v \
 src/button_handshake.v \
 src/char_rom.v \
+src/character_writer.v \
 src/clock_synchronizer.v \
 src/debouncer.v \
 src/edge_detector.v \

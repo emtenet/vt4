@@ -11,7 +11,7 @@ module hdmi
     output wire         vram_valid,
     output wire [4:0]   vram_row,
     output wire [6:0]   vram_col,
-    input wire [7:0]    vram_char,
+    input wire [7:0]    vram_byte,
 
     output wire         hdmi_clk_n,
     output wire         hdmi_clk_p,
@@ -98,7 +98,7 @@ module hdmi
     reg         stage2_v_sync;
     reg [4:0]   stage2_row_pixel;
     reg         stage2_col_start;
-    reg [7:0]   stage2_char;
+    reg [7:0]   stage2_byte;
 
     always @(*) begin
         vram_valid = stage1_col_start;
@@ -112,7 +112,7 @@ module hdmi
         stage2_v_sync <= stage1_v_sync;
         stage2_row_pixel <= stage1_row_pixel;
         stage2_col_start <= stage1_col_start;
-        stage2_char <= vram_char;
+        stage2_byte <= vram_byte;
     end
 
     // get horizontal pixels for char
@@ -134,7 +134,7 @@ module hdmi
     (
         .clk(clk),
         .ce(stage2_col_start),
-        .char(stage2_char),
+        .char(stage2_byte),
         .row(stage2_row_pixel),
         .q(stage3_pixels)
     );

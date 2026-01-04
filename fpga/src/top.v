@@ -26,13 +26,18 @@ module top
     wire        vram_read_valid;
     wire [4:0]  vram_read_row;
     wire [6:0]  vram_read_col;
-    wire [7:0]  vram_read_char;
+    wire [7:0]  vram_read_byte;
 
     wire        vram_write_ready;
     wire        vram_write_valid;
     reg [4:0]   vram_write_row;
     reg [6:0]   vram_write_col;
-    wire [7:0]  vram_write_char;
+    wire [7:0]  vram_write_byte;
+
+    wire        character_ready;
+    wire        character_valid;
+    wire [7:0]  character_byte;
+
     wire        ps2_error;
     wire        ps2_command_ack_ready;
     wire        ps2_command_ack_valid;
@@ -50,7 +55,7 @@ module top
         .vram_valid(vram_read_valid),
         .vram_row(vram_read_row),
         .vram_col(vram_read_col),
-        .vram_char(vram_read_char),
+        .vram_byte(vram_read_byte),
 
         .hdmi_clk_n(hdmi_clk_n),
         .hdmi_clk_p(hdmi_clk_p),
@@ -66,13 +71,29 @@ module top
         .read_valid(vram_read_valid),
         .read_row(vram_read_row),
         .read_col(vram_read_col),
-        .read_char(vram_read_char),
+        .read_byte(vram_read_byte),
 
         .write_ready(vram_write_ready),
         .write_valid(vram_write_valid),
         .write_row(vram_write_row),
         .write_col(vram_write_col),
-        .write_char(vram_write_char)
+        .write_byte(vram_write_byte)
+    );
+
+    character_writer character_writer
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .write_ready(vram_write_ready),
+        .write_valid(vram_write_valid),
+        .write_row(vram_write_row),
+        .write_col(vram_write_col),
+        .write_byte(vram_write_byte),
+
+        .character_ready(character_ready),
+        .character_valid(character_valid),
+        .character_byte(character_byte)
     );
 
     wire    ps2_clk_in;
@@ -137,37 +158,12 @@ module top
         .command_ack_valid(ps2_command_ack_valid),
         .command_ack_error(ps2_command_ack_error),
 
-        .scan_code_ready(vram_write_ready),
-        .scan_code_valid(vram_write_valid),
-        .scan_code_byte(vram_write_char)
+        .scan_code_ready(character_ready),
+        .scan_code_valid(character_valid),
+        .scan_code_byte(character_byte)
     );
 
-    reg [1:0] ps2_counter;
-
-    initial begin
-        ps2_counter = 2'b0;
-        vram_write_row = 5'b0;
-        vram_write_col = 7'b0;
-    end
-
-    always @(posedge clk) begin
-        if (reset_low == LOW) begin
-            vram_write_row <= 5'b0;
-            vram_write_col <= 7'b0;
-            ps2_counter = 2'b0;
-        end else if (vram_write_valid == YES) begin
-            ps2_counter <= ps2_counter + 1;
-            if (vram_write_ready == YES) begin
-                vram_write_col <= vram_write_col + 1;
-                if (vram_write_col == 7'd99) begin
-                    vram_write_row <= vram_write_row + 1;
-                    vram_write_col <= 7'b0;
-                end
-            end
-        end
-    end
-
-    assign led = ~{ps2_error, 3'b0, ps2_counter};
+    assign led = ~{ps2_error, 5'b0};
 
     assign diagnosis = {2'b0, ps2_error, ~reset_low};
 

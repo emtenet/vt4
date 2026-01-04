@@ -23,13 +23,13 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("    input   wire       read_valid,\n");
     verilog.push_str("    input   wire [4:0] read_row,\n");
     verilog.push_str("    input   wire [6:0] read_col,\n");
-    verilog.push_str("    output  wire [7:0] read_char,\n");
+    verilog.push_str("    output  wire [7:0] read_byte,\n");
     verilog.push_str("\n");
     verilog.push_str("    output  wire       write_ready,\n");
     verilog.push_str("    input   wire       write_valid,\n");
     verilog.push_str("    input   wire [4:0] write_row,\n");
     verilog.push_str("    input   wire [6:0] write_col,\n");
-    verilog.push_str("    input   wire [7:0] write_char\n");
+    verilog.push_str("    input   wire [7:0] write_byte\n");
     verilog.push_str(");\n");
     verilog.push_str("\n");
     verilog.push_str("    assign read_ready = 1'b1;\n");
@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("\n");
     verilog.push_str("    wire [31:0] read_upper;\n");
     verilog.push_str("    wire [31:0] read_lower;\n");
-    verilog.push_str("    assign read_char = {read_upper[3:0], read_lower[3:0]};\n");
+    verilog.push_str("    assign read_byte = {read_upper[3:0], read_lower[3:0]};\n");
     verilog.push_str("\n");
     verilog.push_str("    SDPB\n");
     verilog.push_str("    #(\n");
@@ -76,7 +76,7 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("        .RESETA(1'b0),\n");
     verilog.push_str("        .BLKSELA(3'b0),\n");
     verilog.push_str("        .ADA({write_row, write_col, 2'b0}),\n");
-    verilog.push_str("        .DI({28'b0, write_char[7:4]}),\n");
+    verilog.push_str("        .DI({28'b0, write_byte[7:4]}),\n");
     verilog.push_str("\n");
     verilog.push_str("        // port B = read\n");
     verilog.push_str("        .CLKB(clk),\n");
@@ -120,7 +120,7 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("        .RESETA(1'b0),\n");
     verilog.push_str("        .BLKSELA(3'b0),\n");
     verilog.push_str("        .ADA({write_row, write_col, 2'b0}),\n");
-    verilog.push_str("        .DI({28'b0, write_char[3:0]}),\n");
+    verilog.push_str("        .DI({28'b0, write_byte[3:0]}),\n");
     verilog.push_str("\n");
     verilog.push_str("        // port B = read\n");
     verilog.push_str("        .CLKB(clk),\n");
