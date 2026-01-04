@@ -34,7 +34,14 @@ module ps2
 
     localparam ODD_PARITY   = HIGH;
 
+    //==========================================
+    // Sanitize PS/2 clk & data lines
+    //==========================================
+
     wire        ps2_clk;
+    wire        ps2_data;
+    wire        ps2_clk_rising;
+    wire        ps2_clk_falling;
 
     debouncer
     #(
@@ -49,8 +56,6 @@ module ps2
         .bit_out(ps2_clk)
     );
 
-    wire        ps2_data;
-
     debouncer
     #(
         .CYCLES(255)
@@ -64,9 +69,6 @@ module ps2
         .bit_out(ps2_data)
     );
 
-    wire ps2_clk_rising;
-    wire ps2_clk_falling;
-
     /* verilator lint_off PINMISSING */
     edge_detector on_ps2_clk
     (
@@ -79,6 +81,10 @@ module ps2
         .neg_edge(ps2_clk_falling)
     );
     /* verilator lint_on PINMISSING */
+
+    //==========================================
+    // State Machine
+    //==========================================
 
     localparam STATE_IDLE   = 2'b00;
     localparam STATE_RX     = 2'b01;
