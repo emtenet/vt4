@@ -1,7 +1,7 @@
 char-rom-gen/target
 fpga/build
-fpga/src/char_rom.v
-fpga/src/vram.v
+fpga/src/char_rom.sv
+fpga/src/vram.sv
 fpga/tests/ps2/build
 fpga/tests/ps2/*.vcd
 fpga/tests/ps2/*.surf.ron

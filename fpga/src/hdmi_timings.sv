@@ -51,8 +51,8 @@ module hdmi_timings
             h_start <= NO;
             v_start <= NO;
 
-            h_index <= NO;
-            v_index <= NO;
+            h_index <= 0;
+            v_index <= 0;
         end else begin
             active <= YES;
             h_sync <= NO;

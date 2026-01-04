@@ -2,21 +2,21 @@ BOARD=tangnano9k
 FAMILY=GW1N-9C
 DEVICE=GW1NR-LV9QN88PC6/I5
 
-VERILOG=src/top.v \
-src/button_handshake.v \
-src/char_rom.v \
-src/character_writer.v \
-src/clock_synchronizer.v \
-src/debouncer.v \
-src/edge_detector.v \
-src/hdmi.v \
-src/hdmi_clk.v \
-src/hdmi_encode.v \
-src/hdmi_text_mode.v \
-src/hdmi_timings.v \
-src/hdmi_tmds.v \
-src/ps2.v \
-src/vram.v
+VERILOG=src/top.sv \
+src/button_handshake.sv \
+src/char_rom.sv \
+src/character_writer.sv \
+src/clock_synchronizer.sv \
+src/debouncer.sv \
+src/edge_detector.sv \
+src/hdmi.sv \
+src/hdmi_clk.sv \
+src/hdmi_encode.sv \
+src/hdmi_text_mode.sv \
+src/hdmi_timings.sv \
+src/hdmi_tmds.sv \
+src/ps2.sv \
+src/vram.sv
 
 all: build/bitstream.fs
 
@@ -39,7 +39,7 @@ flash: build/bitstream.fs
 	sudo openFPGALoader -b ${BOARD} build/bitstream.fs -f
 
 lint: ${VERILOG}
-	verilator -lint-only -Wall ${VERILOG}
+	verilator -lint-only -Wall -Isrc ${VERILOG}
 
 .PHONY: all sram flash lint
 INTERMEDIATE: build/synth.json build/pnr.json
