@@ -26,8 +26,6 @@ module ps2
     output  wire [7:0]  scan_code_byte
 );
 
-    `include "common.vh"
-
     localparam ACK_BIT      = LOW;
     localparam START_BIT    = LOW;
     localparam STOP_BIT     = HIGH;

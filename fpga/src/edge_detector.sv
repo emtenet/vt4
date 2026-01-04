@@ -11,8 +11,6 @@ module edge_detector
     output  reg         any_edge
 );
 
-    `include "common.vh"
-
     reg previous = LOW;
 
     always @(posedge clk) begin

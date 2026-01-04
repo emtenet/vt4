@@ -18,8 +18,6 @@ module hdmi
     output  wire [2:0]  hdmi_data_p
 );
 
-    `include "common.vh"
-
     wire        stage0_active;
     wire        stage0_h_sync;
     wire        stage0_v_sync;

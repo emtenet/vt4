@@ -2,7 +2,7 @@ BOARD=tangnano9k
 FAMILY=GW1N-9C
 DEVICE=GW1NR-LV9QN88PC6/I5
 
-VERILOG=src/top.sv \
+VERILOG= src/types.sv \
 src/button_handshake.sv \
 src/char_rom.sv \
 src/character_writer.sv \
@@ -16,6 +16,7 @@ src/hdmi_text_mode.sv \
 src/hdmi_timings.sv \
 src/hdmi_tmds.sv \
 src/ps2.sv \
+src/top.sv \
 src/vram.sv
 
 all: build/bitstream.fs

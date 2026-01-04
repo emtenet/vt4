@@ -12,8 +12,6 @@ module hdmi_timings
     output reg      v_start
 );
 
-    `include "common.vh"
-
     initial begin
         active = NO;
         h_sync = NO;

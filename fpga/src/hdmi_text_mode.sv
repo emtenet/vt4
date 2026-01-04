@@ -21,8 +21,6 @@ module hdmi_text_mode
     output reg [3:0]    out_col_pixel
 );
 
-    `include "common.vh"
-
     initial begin
         out_active = NO;
         out_h_sync = NO;

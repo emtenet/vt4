@@ -16,8 +16,6 @@ module hdmi_encode
     output wire [2:0]   hdmi_data_p
 );
 
-    `include "common.vh"
-
     wire [2:0] tmds;
     wire [2:0] tmds_0, tmds_1, tmds_2, tmds_3, tmds_4;
     wire [2:0] tmds_5, tmds_6, tmds_7, tmds_8, tmds_9;

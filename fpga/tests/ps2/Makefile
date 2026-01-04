@@ -1,16 +1,19 @@
 
 all: self_test.vcd reset.vcd
 
+VERILOG=../../src/types.sv ../../src/ps2.sv
+VERILATOR=verilator --build --cc --exe --trace --Mdir build -I../../src --top ps2
+
 self_test.vcd: build/self_test
 	build/self_test
 
-build/self_test: ../../src/ps2.sv self_test.cpp common.h
-	verilator --build --cc --exe -o self_test --trace --Mdir build -I../../src -j ../../src/ps2.sv self_test.cpp
+build/self_test: ${VERILOG} self_test.cpp
+	${VERILATOR} -o self_test $^
 
 reset.vcd: build/reset
 	build/reset
 
-build/reset: ../../src/ps2.sv reset.cpp common.h
-	verilator --build --cc --exe -o reset --trace --Mdir build -I../../src -j ../../src/ps2.sv reset.cpp
+build/reset: ${VERILOG} reset.cpp
+	${VERILATOR} -o reset $^
 
 .PHONY: all

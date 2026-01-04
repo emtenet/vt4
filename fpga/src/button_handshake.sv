@@ -10,8 +10,6 @@ module button_handshake
     output  reg 		valid
 );
 
-    `include "common.vh"
-
     wire debounced;
 
     debouncer

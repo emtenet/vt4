@@ -16,8 +16,6 @@ module character_writer
     output  wire [7:0]  write_byte
 );
 
-    `include "common.vh"
-
     initial begin
         write_row = 5'b0;
         write_col = 7'b0;

@@ -16,8 +16,6 @@ module top
     output wire [2:0]   hdmi_data_p
 );
 
-    `include "common.vh"
-
     //==========================================
     // Prepare HDMI pipeline
     //==========================================
@@ -213,4 +211,3 @@ module top
     assign diagnosis = {2'b0, ps2_error, ~reset_low};
 
 endmodule
-

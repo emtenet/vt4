@@ -11,8 +11,6 @@ module debouncer
     output  reg         bit_out
 );
 
-    `include "common.vh"
-
     localparam CYCLES_WIDTH = (CYCLES == 0) ? 0 : $clog2(CYCLES);
     localparam CYCLES_ZERO = {CYCLES_WIDTH{1'b0}};
 
