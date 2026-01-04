@@ -10,11 +10,15 @@ public:
 };
 
 void Simulation::simulation() {
-	model->command_data = 0xFF; // RESET
+	model->command_ack_ready = 0;
+	model->scan_code_ready = 0;
+
+	model->command_byte = 0xFF; // RESET
 	model->command_valid = 1;
+	model->command_ack_ready = 1;
 	cycle();
 	ASSERT_command_BUSY("until this one completes");
-	model->command_data = 0;
+	model->command_byte = 0;
 	model->command_valid = 0;
 
 	// Host to Keyboard request with CLK pulled LOW
@@ -24,15 +28,13 @@ void Simulation::simulation() {
 	int request_cycles = 0;
 	while (model->ps2_clk_oe == 1) {
 		ASSERT_clk_IS("REQUEST to send", 0);
-		// only need to request for 100us, bail at 1ms
-		assert(request_cycles < FOR_1_ms);
+		ASSERT_LT("request TOO long", request_cycles, FOR_1_ms);
 
 		cycle();
 		request_cycles++;
 	}
 
-	// request at least for 100us
-	assert(request_cycles >= FOR_100_us);
+	ASSERT_LT("request for at least 100us", FOR_100_us, request_cycles);
 
 	ASSERT_data_DRIVEN("for REQUEST to send");
 	ASSERT_data_IS("REQUEST to send", 0);
@@ -71,11 +73,23 @@ void Simulation::simulation() {
 	ASSERT_data_RELEASED("for STOP bit");
 
 	// ACK bit
-	ps2_cycle(0);
-	model->ps2_data_in = 1;
-	cycle();
+	ps2_cycle_ack();
 
+	ASSERT_command_ack_EMPTY("before ACK wait");
+
+	int ack_cycles = 0;
+	while (model->command_ack_valid == 0) {
+		ASSERT_LT("ack TOO long", ack_cycles, FOR_1_ms);
+
+		cycle();
+		ack_cycles++;
+	}
+	ASSERT_command_ack_OK("after SENDING");
 	ASSERT_command_READY("after SENDING");
+
+	cycle();
+	ASSERT_command_ack_EMPTY("after ACK handshake");
+	model->command_ack_ready = 0;
 
 	cycles(FOR_100_us);
 

@@ -4,5 +4,6 @@ fpga/src/char_rom.v
 fpga/src/vram.v
 fpga/tests/ps2/build
 fpga/tests/ps2/*.vcd
+fpga/tests/ps2/*.surf.ron
 vram-gen/init.txt
 vram-gen/target

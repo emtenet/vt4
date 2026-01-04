@@ -33,11 +33,13 @@ public:
 	virtual void simulation()=0;
 protected:
 	void assert_eq(const char* message, int lhs, int rhs, const char* expr, const char* file, int line);
+	void assert_lt(const char* message, const char* expr, const char* file, int line);
 	void cycle_initial();
 	void cycle_final();
 	void cycle();
 	void cycles(int cycles);
 	void ps2_cycle();
+	void ps2_cycle_ack();
 	void ps2_cycle(CData data);
 protected:
 	std::unique_ptr<VerilatedContext> cx;
@@ -61,6 +63,10 @@ SimulationBase::~SimulationBase() {
 	if ((lhs) != (rhs)) { \
 		assert_eq(message, lhs, rhs, #lhs " == " #rhs, __FILE__, __LINE__); \
 	}
+#define ASSERT_LT(message, lhs, rhs) \
+	if ((lhs) >= (rhs)) { \
+		assert_lt(message, #lhs " < " #rhs, __FILE__, __LINE__); \
+	}
 #define ASSERT_clk_DRIVEN(msg) \
 	ASSERT_EQ("host DRIVING clk " msg, model->ps2_clk_oe, 1)
 #define ASSERT_clk_IS(msg, clk) \
@@ -71,6 +77,10 @@ SimulationBase::~SimulationBase() {
 	ASSERT_EQ("CANNOT send a command " msg, model->command_ready, 0)
 #define ASSERT_command_READY(msg) \
 	ASSERT_EQ("CAN send a command " msg, model->command_ready, 1)
+#define ASSERT_command_ack_OK(msg) \
+	ASSERT_EQ("command ack OK " msg, model->command_ack_error, 0)
+#define ASSERT_command_ack_EMPTY(msg) \
+	ASSERT_EQ("command ack EMPTY " msg, model->command_ack_valid, 0)
 #define ASSERT_data_DRIVEN(msg) \
 	ASSERT_EQ("host DRIVING data " msg, model->ps2_data_oe, 1)
 #define ASSERT_data_IS(msg, data) \
@@ -80,7 +90,7 @@ SimulationBase::~SimulationBase() {
 #define ASSERT_scan_code_VALID(msg) \
 	ASSERT_EQ("scan code is VALID " msg, model->scan_code_valid, 1)
 #define ASSERT_scan_code_IS(msg, scan_code) \
-	ASSERT_EQ("scan code IS " msg, model->scan_code_data, scan_code)
+	ASSERT_EQ("scan code IS " msg, model->scan_code_byte, scan_code)
 #define ASSERT_scan_code_TAKEN(msg) \
 	ASSERT_EQ("scan code TAKEN " msg, model->scan_code_valid, 0)
 
@@ -90,6 +100,18 @@ void SimulationBase::assert_eq(const char* message, int lhs, int rhs, const char
 	printf("    %s\n", expr);
 	printf("    LHS = %d\n", lhs);
 	printf("    RHS = %d\n", rhs);
+
+	cycle_final();
+
+    model->final();
+    trace->close();
+	exit(1);
+}
+
+void SimulationBase::assert_lt(const char* message, const char* expr, const char* file, int line) {
+	printf("ASSERTION FAILED in %s:%d\n", file, line);
+	printf("    %s\n", message);
+	printf("    %s\n", expr);
 
 	cycle_final();
 
@@ -136,6 +158,15 @@ void SimulationBase::ps2_cycle() {
 	cycles(PS2_HALF_CYCLES);
 	model->ps2_clk_in = 1;
 	cycles(PS2_HALF_CYCLES - PS2_SETUP_CYCLES);
+}
+
+void SimulationBase::ps2_cycle_ack() {
+	model->ps2_data_in = 0;
+	cycles(PS2_SETUP_CYCLES);
+	model->ps2_clk_in = 0;
+	cycles(PS2_HALF_CYCLES);
+	model->ps2_clk_in = 1;
+	model->ps2_data_in = 1;
 }
 
 void SimulationBase::ps2_cycle(CData data) {

@@ -11,16 +11,19 @@ module ps2
     output  wire        ps2_data_out,
     output  wire        ps2_data_oe,
 
-    output  wire [1:0]  diagnosis_state,
     output  reg         error,
 
     output  wire        command_ready,
     input   wire        command_valid,
-    input   wire [7:0]  command_data,
+    input   wire [7:0]  command_byte,
+
+    input   wire        command_ack_ready,
+    output  reg         command_ack_valid,
+    output  reg         command_ack_error,
 
     input   wire        scan_code_ready,
     output  reg         scan_code_valid,
-    output  wire [7:0]  scan_code_data
+    output  wire [7:0]  scan_code_byte
 );
 
     `include "common.vh"
@@ -119,7 +122,7 @@ module ps2
                             && (ps2_data == STOP_BIT); // STOP bit
 
     wire command_parity;
-    assign command_parity = ~(^ command_data);
+    assign command_parity = ~(^ command_byte);
 
     wire command_success;
     assign command_success = (ps2_data == ACK_BIT);
@@ -129,6 +132,8 @@ module ps2
         frame = FRAME_BIT_0;
         parity = LOW;
         command = 10'b0;
+        command_ack_valid = NO;
+        command_ack_error = NO;
         scan_code_valid = NO;
         scan_code = 8'b0;
         error = NO;
@@ -142,6 +147,11 @@ module ps2
             scan_code <= 8'b0;
         end
 
+        if (command_ack_valid == YES && command_ack_ready == YES) begin
+            command_ack_valid <= NO;
+            command_ack_error <= NO;
+        end
+
         case (state)
             STATE_IDLE: begin
                 if (command_valid == YES) begin
@@ -149,7 +159,9 @@ module ps2
                     frame <= FRAME_REQUEST;
                     watchdog <= WATCHDOG_START;
                     request <= REQUEST_START;
-                    command <= {command_parity, command_data, START_BIT};
+                    command <= {command_parity, command_byte, START_BIT};
+                    command_ack_valid <= NO;
+                    command_ack_error <= NO;
                 end else if (ps2_clk_falling == YES) begin
                     // START bit?
                     if (ps2_data == START_BIT) begin
@@ -205,6 +217,7 @@ module ps2
                     if (ps2_clk_rising == YES) begin
                         state <= STATE_IDLE;
                         frame <= FRAME_BIT_0;
+                        command_ack_valid <= YES;
                     end
                 end else begin
                     if (ps2_clk_falling == YES) begin
@@ -216,14 +229,15 @@ module ps2
                         command <= {STOP_BIT, command[9:1]};
 
                         if (frame == FRAME_STOP) begin
-                            error <= ~command_success;
+                            command_ack_error <= ~command_success;
                         end
                     end
                 end
 
                 if (watchdog == WATCHDOG_STOP) begin
                     state <= STATE_IDLE;
-                    error <= YES;
+                    command_ack_valid <= YES;
+                    command_ack_error <= YES;
                 end
             end
             default: begin
@@ -245,7 +259,7 @@ module ps2
     end
 
     assign command_ready = (state == STATE_IDLE) && (reset_low == HIGH);
-    assign scan_code_data = scan_code;
+    assign scan_code_byte = scan_code;
 
     assign ps2_clk_oe = (state == STATE_TX)
                        ? (frame == FRAME_REQUEST)
@@ -256,7 +270,5 @@ module ps2
                        ? (frame >= FRAME_REQUEST || frame <= FRAME_PARITY)
                        : NO;
     assign ps2_data_out = command[0];
-
-    assign diagnosis_state = state;
 
 endmodule

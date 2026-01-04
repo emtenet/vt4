@@ -34,7 +34,9 @@ module top
     reg [6:0]   vram_write_col;
     wire [7:0]  vram_write_char;
     wire        ps2_error;
-    wire [1:0]  ps2_state;
+    wire        ps2_command_ack_ready;
+    wire        ps2_command_ack_valid;
+    wire        ps2_command_ack_error;
 
     hdmi hdmi
     (
@@ -125,16 +127,19 @@ module top
         .ps2_data_out(ps2_data_out),
         .ps2_data_oe(ps2_data_oe),
 
-        .diagnosis_state(ps2_state),
         .error(ps2_error),
 
         .command_ready(command_ready),
         .command_valid(command_valid),
-        .command_data(8'hFF),
+        .command_byte(8'hFF),
+
+        .command_ack_ready(ps2_command_ack_ready),
+        .command_ack_valid(ps2_command_ack_valid),
+        .command_ack_error(ps2_command_ack_error),
 
         .scan_code_ready(vram_write_ready),
         .scan_code_valid(vram_write_valid),
-        .scan_code_data(vram_write_char)
+        .scan_code_byte(vram_write_char)
     );
 
     reg [1:0] ps2_counter;
@@ -164,7 +169,7 @@ module top
 
     assign led = ~{ps2_error, 3'b0, ps2_counter};
 
-    assign diagnosis = {ps2_state, ps2_error, ~reset_low};
+    assign diagnosis = {2'b0, ps2_error, ~reset_low};
 
 endmodule
 
