@@ -2,12 +2,11 @@
 module top
 (
     input wire          xtal,
-    input wire          reset_low,
 
     inout wire          ps2_clk_pin,
     inout wire          ps2_data_pin,
 
-    input wire          button,
+    input wire [1:0]    button,
     output wire [5:0]   led,
     output wire [3:0]   diagnosis,
 
@@ -21,7 +20,7 @@ module top
 
     wire        clk;
     wire        clk_5x;
-    wire        clk_reset;
+    wire        reset_low;
 
     wire        vram_read_ready;
     wire        vram_read_valid;
@@ -42,7 +41,7 @@ module top
         .xtal(xtal),
         .clk(clk),
         .clk_5x(clk_5x),
-        .reset_low(clk_reset),
+        .reset_low(reset_low),
 
         .top_row(5'd0),
 
@@ -108,7 +107,7 @@ module top
         .clk(clk),
         .reset_low(reset_low),
 
-        .button(button),
+        .button(button[0]),
 
         .ready(command_ready),
         .valid(command_valid)
@@ -165,7 +164,7 @@ module top
 
     assign led = ~{ps2_error, 3'b0, ps2_counter};
 
-    assign diagnosis = {ps2_state, ps2_error, command_valid};
+    assign diagnosis = {ps2_state, ps2_error, ~reset_low};
 
 endmodule
 
