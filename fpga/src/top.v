@@ -18,87 +18,56 @@ module top
 
     `include "common.vh"
 
+    //==========================================
+    // Prepare HDMI pipeline
+    //==========================================
+
     wire        clk;
     wire        clk_5x;
+    wire        lock;
     wire        reset_low;
 
-    wire        vram_read_ready;
-    wire        vram_read_valid;
-    wire [4:0]  vram_read_row;
-    wire [6:0]  vram_read_col;
-    wire [7:0]  vram_read_byte;
-
-    wire        vram_write_ready;
-    wire        vram_write_valid;
-    reg [4:0]   vram_write_row;
-    reg [6:0]   vram_write_col;
-    wire [7:0]  vram_write_byte;
-
-    wire        character_ready;
-    wire        character_valid;
-    wire [7:0]  character_byte;
-
-    wire        ps2_error;
-    wire        ps2_command_ack_ready;
-    wire        ps2_command_ack_valid;
-    wire        ps2_command_ack_error;
-
-    hdmi hdmi
+    hdmi_clk hdmi_clk
     (
         .xtal(xtal),
         .clk(clk),
         .clk_5x(clk_5x),
-        .reset_low(reset_low),
-
-        .top_row(5'd0),
-
-        .vram_valid(vram_read_valid),
-        .vram_row(vram_read_row),
-        .vram_col(vram_read_col),
-        .vram_byte(vram_read_byte),
-
-        .hdmi_clk_n(hdmi_clk_n),
-        .hdmi_clk_p(hdmi_clk_p),
-        .hdmi_data_n(hdmi_data_n),
-        .hdmi_data_p(hdmi_data_p)
+        .lock(lock)
     );
 
-    vram vram
+    clock_synchronizer for_reset
     (
         .clk(clk),
 
-        .read_ready(vram_read_ready),
-        .read_valid(vram_read_valid),
-        .read_row(vram_read_row),
-        .read_col(vram_read_col),
-        .read_byte(vram_read_byte),
-
-        .write_ready(vram_write_ready),
-        .write_valid(vram_write_valid),
-        .write_row(vram_write_row),
-        .write_col(vram_write_col),
-        .write_byte(vram_write_byte)
+        .bit_in(lock),
+        .bit_out(reset_low)
     );
 
-    character_writer character_writer
+    //==========================================
+    // Button press sends a PS/2 command
+    //==========================================
+
+    wire    command_ready;
+    wire    command_valid;
+
+    button_handshake for_button
     (
         .clk(clk),
         .reset_low(reset_low),
 
-        .write_ready(vram_write_ready),
-        .write_valid(vram_write_valid),
-        .write_row(vram_write_row),
-        .write_col(vram_write_col),
-        .write_byte(vram_write_byte),
+        .button(button[0]),
 
-        .character_ready(character_ready),
-        .character_valid(character_valid),
-        .character_byte(character_byte)
+        .ready(command_ready),
+        .valid(command_valid)
     );
 
-    wire    ps2_clk_in;
-    wire    ps2_clk_out;
-    wire    ps2_clk_oe;
+    //==========================================
+    // PS/2 physical pins
+    //==========================================
+
+    wire        ps2_clk_in;
+    wire        ps2_clk_out;
+    wire        ps2_clk_oe;
 
     IOBUF ps2_clk
     (
@@ -122,19 +91,19 @@ module top
         .OEN(~ps2_data_oe)
     );
 
-    wire    command_ready;
-    wire    command_valid;
+    //==========================================
+    // PS/2 frame logic
+    //==========================================
 
-    button_handshake for_button
-    (
-        .clk(clk),
-        .reset_low(reset_low),
+    wire        character_ready;
+    wire        character_valid;
+    wire [7:0]  character_byte;
 
-        .button(button[0]),
+    wire        command_ack_ready;
+    wire        command_ack_valid;
+    wire        command_ack_error;
 
-        .ready(command_ready),
-        .valid(command_valid)
-    );
+    wire        ps2_error;
 
     ps2 ps2
     (
@@ -154,13 +123,89 @@ module top
         .command_valid(command_valid),
         .command_byte(8'hFF),
 
-        .command_ack_ready(ps2_command_ack_ready),
-        .command_ack_valid(ps2_command_ack_valid),
-        .command_ack_error(ps2_command_ack_error),
+        .command_ack_ready(command_ack_ready),
+        .command_ack_valid(command_ack_valid),
+        .command_ack_error(command_ack_error),
 
         .scan_code_ready(character_ready),
         .scan_code_valid(character_valid),
         .scan_code_byte(character_byte)
+    );
+
+    //==========================================
+    // VRAM
+    //==========================================
+
+    wire        vram_read_ready;
+    wire        vram_read_valid;
+    wire [4:0]  vram_read_row;
+    wire [6:0]  vram_read_col;
+    wire [7:0]  vram_read_byte;
+
+    wire        vram_write_ready;
+    wire        vram_write_valid;
+    reg [4:0]   vram_write_row;
+    reg [6:0]   vram_write_col;
+    wire [7:0]  vram_write_byte;
+
+    vram vram
+    (
+        .clk(clk),
+
+        .read_ready(vram_read_ready),
+        .read_valid(vram_read_valid),
+        .read_row(vram_read_row),
+        .read_col(vram_read_col),
+        .read_byte(vram_read_byte),
+
+        .write_ready(vram_write_ready),
+        .write_valid(vram_write_valid),
+        .write_row(vram_write_row),
+        .write_col(vram_write_col),
+        .write_byte(vram_write_byte)
+    );
+
+    //==========================================
+    // Write characters to VRAM
+    //==========================================
+
+    character_writer character_writer
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .character_ready(character_ready),
+        .character_valid(character_valid),
+        .character_byte(character_byte),
+
+        .write_ready(vram_write_ready),
+        .write_valid(vram_write_valid),
+        .write_row(vram_write_row),
+        .write_col(vram_write_col),
+        .write_byte(vram_write_byte)
+    );
+
+    //==========================================
+    // Display VRAM to HDMI
+    //==========================================
+
+    hdmi hdmi
+    (
+        .clk(clk),
+        .clk_5x(clk_5x),
+        .reset_low(reset_low),
+
+        .top_row(5'd0),
+
+        .vram_valid(vram_read_valid),
+        .vram_row(vram_read_row),
+        .vram_col(vram_read_col),
+        .vram_byte(vram_read_byte),
+
+        .hdmi_clk_n(hdmi_clk_n),
+        .hdmi_clk_p(hdmi_clk_p),
+        .hdmi_data_n(hdmi_data_n),
+        .hdmi_data_p(hdmi_data_p)
     );
 
     assign led = ~{ps2_error, 5'b0};

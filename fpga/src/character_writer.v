@@ -3,15 +3,17 @@ module character_writer
     input   wire        clk,
     input   wire        reset_low,
 
+    // character input
+    output  wire        character_ready,
+    input   wire        character_valid,
+    input   wire [7:0]  character_byte,
+
+    // write output
     input   wire        write_ready,
     output  reg         write_valid,
     output  reg [4:0]   write_row,
     output  reg [6:0]   write_col,
-    output  wire [7:0]  write_byte,
-
-    output  wire        character_ready,
-    input   wire        character_valid,
-    input   wire [7:0]  character_byte
+    output  wire [7:0]  write_byte
 );
 
     `include "common.vh"

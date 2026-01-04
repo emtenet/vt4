@@ -1,43 +1,24 @@
 `default_nettype none
 module hdmi
 (
-    input wire          xtal,
-    output wire         clk,
-    output wire         clk_5x,
-    output wire         reset_low,
+    input   wire        clk,
+    input   wire        clk_5x,
+    input   wire        reset_low,
 
-    input wire [4:0]    top_row,
+    input   wire [4:0]  top_row,
 
-    output wire         vram_valid,
-    output wire [4:0]   vram_row,
-    output wire [6:0]   vram_col,
-    input wire [7:0]    vram_byte,
+    output  wire        vram_valid,
+    output  wire [4:0]  vram_row,
+    output  wire [6:0]  vram_col,
+    input   wire [7:0]  vram_byte,
 
-    output wire         hdmi_clk_n,
-    output wire         hdmi_clk_p,
-    output wire [2:0]   hdmi_data_n,
-    output wire [2:0]   hdmi_data_p
+    output  wire        hdmi_clk_n,
+    output  wire        hdmi_clk_p,
+    output  wire [2:0]  hdmi_data_n,
+    output  wire [2:0]  hdmi_data_p
 );
 
     `include "common.vh"
-
-    wire lock;
-
-    hdmi_clk hdmi_clk
-    (
-        .xtal(xtal),
-        .clk(clk),
-        .clk_5x(clk_5x),
-        .lock(lock)
-    );
-
-    clock_synchronizer for_reset
-    (
-        .clk(clk),
-
-        .bit_in(lock),
-        .bit_out(reset_low)
-    );
 
     wire        stage0_active;
     wire        stage0_h_sync;
