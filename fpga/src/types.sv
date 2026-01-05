@@ -1,5 +1,6 @@
 `default_nettype none
-package common;
+`timescale 1ns / 1ps
+package types;
     localparam YES = 1'b1;
     localparam NO = 1'b0;
 
@@ -10,4 +11,4 @@ package common;
     localparam NEVER = 1'b0;
 endpackage
 
-import common::*;
+import types::*;

@@ -1,4 +1,5 @@
 `default_nettype none
+`timescale 1ns / 1ps
 module clock_synchronizer
 #(
     parameter EXTRA_DEPTH = 0

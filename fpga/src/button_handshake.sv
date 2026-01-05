@@ -1,4 +1,5 @@
 `default_nettype none
+`timescale 1ns / 1ps
 module button_handshake
 (
     input   wire        clk,
@@ -25,7 +26,9 @@ module button_handshake
         .bit_out(debounced)
     );
 
+    wire pos_edge;
     wire neg_edge;
+    wire any_edge;
 
     edge_detector on_debounced
     (
@@ -34,7 +37,9 @@ module button_handshake
 
         .level(debounced),
 
-        .neg_edge(neg_edge)
+        .pos_edge(pos_edge),
+        .neg_edge(neg_edge),
+        .any_edge(any_edge)
     );
 
     initial begin

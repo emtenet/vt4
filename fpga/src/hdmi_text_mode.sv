@@ -1,4 +1,5 @@
 `default_nettype none
+`timescale 1ns / 1ps
 module hdmi_text_mode
 (
     input wire          clk,
