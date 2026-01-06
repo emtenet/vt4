@@ -10,22 +10,25 @@ public:
 };
 
 void Simulation::simulation() {
-	COMMAND("RESET", 0x96); // FF);
+	SCAN_CODE("NUM LOCK", 0x77);
+	SCAN_CODE_handshake();
 
-	cycles(FOR_100_us);
+	COMMAND("SET STATUS", 0xED);
+	SCAN_CODE("ACKNOWLEDGE", 0xFA);
+	SCAN_CODE_handshake();
 
-	SCAN_CODE("acknowledge", 0xFA);
-
-	cycles(FOR_10_us);
-
+	COMMAND("all LEDS on", 0x07);
+	SCAN_CODE("ACKNOWLEDGE", 0xFA);
 	SCAN_CODE_handshake();
 
 	cycles(FOR_1_ms);
 
-	SCAN_CODE("self test", 0xAA);
+	SCAN_CODE("RELEASED", 0xF0);
+	SCAN_CODE_handshake();
 
-	cycles(FOR_100_us);
+	cycles(FOR_1_ms);
 
+	SCAN_CODE("NUM LOCK", 0x77);
 	SCAN_CODE_handshake();
 }
 
@@ -33,6 +36,6 @@ int main(int argc, char **argv) {
 	std::srand(std::time({}));
 
 	Simulation simulation;
-	simulation.start(argc, argv, "reset.vcd");
+	simulation.start(argc, argv, "set_status.vcd");
 	return 0;
 }

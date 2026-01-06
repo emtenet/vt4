@@ -46,19 +46,19 @@ module top
     // Button press sends a PS/2 command
     //==========================================
 
-    wire    command_ready;
-    wire    command_valid;
+    // wire    command_ready;
+    // wire    command_valid;
 
-    button_handshake for_button
-    (
-        .clk(clk),
-        .reset_low(reset_low),
+    // button_handshake for_button
+    // (
+    //     .clk(clk),
+    //     .reset_low(reset_low),
 
-        .button(button[0]),
+    //     .button(button[0]),
 
-        .ready(command_ready),
-        .valid(command_valid)
-    );
+    //     .ready(command_ready),
+    //     .valid(command_valid)
+    // );
 
     //==========================================
     // PS/2 physical pins
@@ -94,15 +94,18 @@ module top
     // PS/2 frame logic
     //==========================================
 
-    wire        character_ready;
-    wire        character_valid;
-    wire [7:0]  character_byte;
+    wire        command_ready;
+    wire        command_valid;
+    wire [7:0]  command_byte;
 
     wire        command_ack_ready;
     wire        command_ack_valid;
     wire        command_ack_error;
 
-    wire        ps2_error;
+    wire        scan_code_ready;
+    wire        scan_code_valid;
+    wire [7:0]  scan_code_byte;
+    wire        scan_code_error;
 
     ps2 ps2
     (
@@ -116,19 +119,48 @@ module top
         .ps2_data_out(ps2_data_out),
         .ps2_data_oe(ps2_data_oe),
 
-        .error(ps2_error),
-
         .command_ready(command_ready),
         .command_valid(command_valid),
-        .command_byte(8'hFF),
+        .command_byte(command_byte),
 
         .command_ack_ready(command_ack_ready),
         .command_ack_valid(command_ack_valid),
         .command_ack_error(command_ack_error),
 
-        .scan_code_ready(character_ready),
-        .scan_code_valid(character_valid),
-        .scan_code_byte(character_byte)
+        .scan_code_ready(scan_code_ready),
+        .scan_code_valid(scan_code_valid),
+        .scan_code_byte(scan_code_byte),
+        .scan_code_error(scan_code_error)
+    );
+
+    //==========================================
+    // PS/2 state
+    //==========================================
+
+    wire        character_ready;
+    wire        character_valid;
+    wire [7:0]  character_byte;
+
+    keyboard keyboard
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .command_ready(command_ready),
+        .command_valid(command_valid),
+        .command_byte(command_byte),
+
+        .command_ack_ready(command_ack_ready),
+        .command_ack_valid(command_ack_valid),
+        .command_ack_error(command_ack_error),
+
+        .scan_code_ready(scan_code_ready),
+        .scan_code_valid(scan_code_valid),
+        .scan_code_byte(scan_code_byte),
+
+        .character_ready(character_ready),
+        .character_valid(character_valid),
+        .character_byte(character_byte)
     );
 
     //==========================================
@@ -207,8 +239,8 @@ module top
         .hdmi_data_p(hdmi_data_p)
     );
 
-    assign led = ~{ps2_error, 5'b0};
+    assign led = ~{scan_code_error, 5'b0};
 
-    assign diagnosis = {2'b0, ps2_error, ~reset_low};
+    assign diagnosis = {2'b0, scan_code_error, ~reset_low};
 
 endmodule

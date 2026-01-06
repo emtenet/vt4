@@ -6,15 +6,13 @@ module ps2
     input   wire        reset_low,
 
     input   wire        ps2_clk_in,
-    output  wire        ps2_clk_out,
-    output  wire        ps2_clk_oe,
+    output  logic       ps2_clk_out,
+    output  logic       ps2_clk_oe,
     input   wire        ps2_data_in,
-    output  wire        ps2_data_out,
-    output  wire        ps2_data_oe,
+    output  logic       ps2_data_out,
+    output  logic       ps2_data_oe,
 
-    output  reg         error,
-
-    output  wire        command_ready,
+    output  logic       command_ready,
     input   wire        command_valid,
     input   wire [7:0]  command_byte,
 
@@ -24,12 +22,13 @@ module ps2
 
     input   wire        scan_code_ready,
     output  reg         scan_code_valid,
-    output  wire [7:0]  scan_code_byte
+    output  logic [7:0] scan_code_byte,
+    output  reg         scan_code_error
 );
 
-    localparam ACK_BIT      = LOW;
     localparam START_BIT    = LOW;
     localparam STOP_BIT     = HIGH;
+    localparam ACK_BIT      = LOW;
 
     localparam ODD_PARITY   = HIGH;
 
@@ -41,6 +40,7 @@ module ps2
     wire        ps2_data;
     wire        ps2_clk_rising;
     wire        ps2_clk_falling;
+    wire        ps2_clk_changed;
 
     debouncer
     #(
@@ -68,7 +68,6 @@ module ps2
         .bit_out(ps2_data)
     );
 
-    /* verilator lint_off PINMISSING */
     edge_detector on_ps2_clk
     (
         .clk(clk),
@@ -77,76 +76,275 @@ module ps2
         .level(ps2_clk),
 
         .pos_edge(ps2_clk_rising),
-        .neg_edge(ps2_clk_falling)
+        .neg_edge(ps2_clk_falling),
+        .any_edge(ps2_clk_changed)
     );
-    /* verilator lint_on PINMISSING */
+
+    //==========================================
+    // Timers
+    //==========================================
+
+    logic       watchdog_clear;
+    logic       watchdog_enabled;
+    wire        watchdog_finished;
+
+    // slowest frame is every 11 bits @ 10kHz = 1100us
+    timer
+    #(
+        .CLK_HZ(51_800_000),
+        .TIMER_HZ(10_000 / 11)
+    )
+    watchdog
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .clear(watchdog_clear),
+        .enabled(watchdog_enabled),
+
+        .finished(watchdog_finished)
+    );
+
+    logic       delay_clear;
+    logic       delay_enabled;
+    wire        delay_finished;
+
+    // Used for
+    //  - request to tx
+    //  - end of rx/tx frames
+    // Request to tx must be at least 100us
+    timer
+    #(
+        .CLK_HZ(51_800_000),
+        .TIMER_HZ(1_000_000 / 100)
+    )
+    delay
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .clear(delay_clear),
+        .enabled(delay_enabled),
+
+        .finished(delay_finished)
+    );
 
     //==========================================
     // State Machine
     //==========================================
 
-    localparam STATE_IDLE   = 2'b00;
-    localparam STATE_RX     = 2'b01;
-    localparam STATE_TX     = 2'b10;
-    reg [1:0]   state;
+    localparam STATE_IDLE       = 5'd0;
 
-    localparam FRAME_BIT_0  = 4'd0;
-    localparam FRAME_BIT_1  = 4'd1;
-    localparam FRAME_BIT_2  = 4'd2;
-    localparam FRAME_BIT_3  = 4'd3;
-    localparam FRAME_BIT_4  = 4'd4;
-    localparam FRAME_BIT_5  = 4'd5;
-    localparam FRAME_BIT_6  = 4'd6;
-    localparam FRAME_BIT_7  = 4'd7;
-    localparam FRAME_PARITY = 4'd8;
-    localparam FRAME_STOP   = 4'd9;
-    localparam FRAME_ACK    = 4'd10;
-    localparam FRAME_REQUEST= 4'd14;
-    localparam FRAME_START  = 4'd15;
-    reg [3:0]   frame;
-    reg         parity;
-    reg [9:0]   command;
+    localparam STATE_RX_BIT_0   = 5'd5;
+    localparam STATE_RX_BIT_1   = 5'd6;
+    localparam STATE_RX_BIT_2   = 5'd7;
+    localparam STATE_RX_BIT_3   = 5'd8;
+    localparam STATE_RX_BIT_4   = 5'd9;
+    localparam STATE_RX_BIT_5   = 5'd10;
+    localparam STATE_RX_BIT_6   = 5'd11;
+    localparam STATE_RX_BIT_7   = 5'd12;
+    localparam STATE_RX_PARITY  = 5'd13;
+    localparam STATE_RX_STOP    = 5'd14;
+    localparam STATE_RX_END     = 5'd15;
+
+    localparam STATE_TX_REQUEST = 5'd19;
+    localparam STATE_TX_START   = 5'd20;
+    localparam STATE_TX_BIT_0   = 5'd21;
+    localparam STATE_TX_BIT_1   = 5'd22;
+    localparam STATE_TX_BIT_2   = 5'd23;
+    localparam STATE_TX_BIT_3   = 5'd24;
+    localparam STATE_TX_BIT_4   = 5'd25;
+    localparam STATE_TX_BIT_5   = 5'd26;
+    localparam STATE_TX_BIT_6   = 5'd27;
+    localparam STATE_TX_BIT_7   = 5'd28;
+    localparam STATE_TX_PARITY  = 5'd29;
+    localparam STATE_TX_STOP    = 5'd30;
+    localparam STATE_TX_ACK     = 5'd31;
+    reg [4:0]   state;
+    logic       state_is_tx;
+
     reg [7:0]   scan_code;
+    reg         scan_code_parity;
+    reg         scan_code_success;
 
-    // slowest frame @ 10kHz = 1100us
-    // is 56,980 cycles at 51.8MHz
-    // round up to 65,535 (16 bit counter)
-    reg [15:0] watchdog;
-    localparam WATCHDOG_START   = 16'b0;
-    localparam WATCHDOG_STOP    = 16'b1111_1111_1111_1111;
+    reg [9:0]   command;
+    logic       command_parity;
+    reg         command_success;
 
-    // request timer at least 100us
-    // is 5,180 cycles at 51.8MHz
-    // round up to 8191 (13 bit counter)
-    reg [12:0] request;
-    localparam REQUEST_START    = 13'b0;
-    localparam REQUEST_STOP     = 13'b1_1111_1111_1111;
+    always_comb begin
+        // STATE_RX is  1..15
+        // STATE_TX is 19..31
+        state_is_tx = state[4];
 
-    wire scan_code_success;
-    assign scan_code_success = (parity == ODD_PARITY)
-                            && (ps2_data == STOP_BIT); // STOP bit
+        command_ready = (state == STATE_IDLE) && (reset_low == HIGH);
+        command_parity = ~(^ command_byte);
 
-    wire command_parity;
-    assign command_parity = ~(^ command_byte);
+        scan_code_byte = scan_code;
+    end
 
-    wire command_success;
-    assign command_success = (ps2_data == ACK_BIT);
+    //==========================================
+    // State Transitions
+    //==========================================
+
+    logic       did_rx_start;
+    logic       did_rx_bit;
+    logic       did_rx_parity;
+    logic       was_rx_success;
+    logic       did_rx_end;
+
+    logic       did_tx_start;
+    logic       did_tx_bit;
+    logic       was_tx_success;
+    logic       did_tx_end;
+
+    logic       next_state;
+
+    always_comb begin
+        ps2_clk_oe = NO;
+        ps2_clk_out = LOW;
+
+        ps2_data_oe = NO;
+        ps2_data_out = command[0];
+
+        watchdog_clear = NO;
+        watchdog_enabled = (state != STATE_IDLE);
+
+        delay_clear = NO;
+        delay_enabled = NO;
+
+        did_rx_start = NO;
+        did_rx_bit = NO;
+        did_rx_parity = NO;
+        was_rx_success = NO;
+        did_rx_end = NO;
+
+        did_tx_start = NO;
+        did_tx_bit = NO;
+        was_tx_success = NO;
+        did_tx_end = NO;
+
+        next_state = NO;
+
+        case (state)
+            STATE_IDLE: begin
+                if (command_valid == YES) begin
+                    did_tx_start = YES;
+                    watchdog_clear = YES;
+                    delay_clear = YES;
+                end else if (ps2_clk_falling == YES) begin
+                    if (ps2_data == START_BIT) begin
+                        did_rx_start = YES;
+                        watchdog_clear = YES;
+                    end
+                end
+            end
+
+            // RX states
+
+            STATE_RX_BIT_0,
+            STATE_RX_BIT_1,
+            STATE_RX_BIT_2,
+            STATE_RX_BIT_3,
+            STATE_RX_BIT_4,
+            STATE_RX_BIT_5,
+            STATE_RX_BIT_6,
+            STATE_RX_BIT_7: begin
+                if (ps2_clk_falling == YES) begin
+                    next_state = YES;
+                    did_rx_bit = YES;
+                    did_rx_parity = YES;
+                end
+            end
+            STATE_RX_PARITY: begin
+                if (ps2_clk_falling == YES) begin
+                    next_state = YES;
+                    did_rx_parity = YES;
+                end
+            end
+            STATE_RX_STOP: begin
+                if (ps2_clk_falling == YES) begin
+                    next_state = YES;
+                    was_rx_success = YES;
+                    delay_clear = YES;
+                end
+            end
+            STATE_RX_END: begin
+                delay_enabled = YES;
+                if (delay_finished == YES) begin
+                    did_rx_end = YES;
+                end
+            end
+
+            // TX states
+
+            STATE_TX_REQUEST: begin
+                ps2_clk_oe = YES;
+                ps2_data_oe = YES;
+                delay_enabled = YES;
+                if (delay_finished == YES) begin
+                    next_state = YES;
+                end
+            end
+            STATE_TX_START: begin
+                ps2_data_oe = YES;
+                if (ps2_clk_falling == YES) begin
+                    watchdog_clear = YES;
+                    next_state = YES;
+                    did_tx_bit = YES;
+                end
+            end
+            STATE_TX_BIT_0,
+            STATE_TX_BIT_1,
+            STATE_TX_BIT_2,
+            STATE_TX_BIT_3,
+            STATE_TX_BIT_4,
+            STATE_TX_BIT_5,
+            STATE_TX_BIT_6,
+            STATE_TX_BIT_7,
+            STATE_TX_PARITY: begin
+                ps2_data_oe = YES;
+                if (ps2_clk_falling == YES) begin
+                    next_state = YES;
+                    did_tx_bit = YES;
+                end
+            end
+            STATE_TX_STOP: begin
+                if (ps2_clk_falling == YES) begin
+                    next_state = YES;
+                    was_tx_success = YES;
+                    delay_clear = YES;
+                end
+            end
+            STATE_TX_ACK: begin
+                delay_enabled = YES;
+                if (delay_finished == YES) begin
+                    did_tx_end = YES;
+                end
+            end
+            default: begin
+
+            end
+        endcase
+    end
 
     initial begin
         state = STATE_IDLE;
-        frame = FRAME_BIT_0;
-        parity = LOW;
-        command = 10'b0;
-        command_ack_valid = NO;
-        command_ack_error = NO;
+
         scan_code_valid = NO;
         scan_code = 8'b0;
-        error = NO;
-        watchdog = WATCHDOG_START;
-        request = REQUEST_START;
+        scan_code_parity = LOW;
+        scan_code_success = NO;
+        scan_code_error = NO;
+
+        command = 10'b0;
+        command_success = NO;
+        command_ack_valid = NO;
+        command_ack_error = NO;
     end
 
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
+        // Channel handshakes
+
         if (scan_code_valid == YES && scan_code_ready == YES) begin
             scan_code_valid <= NO;
             scan_code <= 8'b0;
@@ -157,123 +355,88 @@ module ps2
             command_ack_error <= NO;
         end
 
-        case (state)
-            STATE_IDLE: begin
-                if (command_valid == YES) begin
-                    state <= STATE_TX;
-                    frame <= FRAME_REQUEST;
-                    watchdog <= WATCHDOG_START;
-                    request <= REQUEST_START;
-                    command <= {command_parity, command_byte, START_BIT};
-                    command_ack_valid <= NO;
-                    command_ack_error <= NO;
-                end else if (ps2_clk_falling == YES) begin
-                    // START bit?
-                    if (ps2_data == START_BIT) begin
-                        state <= STATE_RX;
-                        frame <= FRAME_BIT_0;
-                        watchdog <= WATCHDOG_START;
-                        parity <= LOW;
-                        scan_code_valid <= NO;
-                    end
-                end
+        // RX transitions
+
+        if (did_rx_start == YES) begin
+            state <= STATE_RX_BIT_0;
+            scan_code_valid <= NO;
+            scan_code_parity <= LOW;
+        end
+
+        if (did_rx_bit == YES) begin
+            scan_code <= {ps2_data, scan_code[7:1]};
+        end
+
+        if (did_rx_parity == YES) begin
+            scan_code_parity <= scan_code_parity ^ ps2_data;
+        end
+
+        if (was_rx_success == YES) begin
+            scan_code_success <= (scan_code_parity == ODD_PARITY)
+                              && (ps2_data == STOP_BIT);
+        end
+
+        if (did_rx_end == YES) begin
+            state <= STATE_IDLE;
+            scan_code_valid <= scan_code_success;
+            scan_code_error <= ~scan_code_success;
+        end
+
+        // TX transitions
+
+        if (did_tx_start == YES) begin
+            state <= STATE_TX_REQUEST;
+            command <= {command_parity, command_byte, START_BIT};
+            command_ack_valid <= NO;
+            command_ack_error <= NO;
+        end
+
+        if (did_tx_bit == YES) begin
+            command <= {STOP_BIT, command[9:1]};
+        end
+
+        if (was_tx_success) begin
+            command_success <= (ps2_data == ACK_BIT);
+        end
+
+        if (did_tx_end) begin
+            state <= STATE_IDLE;
+            command_ack_valid <= YES;
+            command_ack_error <= ~command_success;
+        end
+
+        // General transitions
+
+        if (next_state == YES) begin
+            state <= state + 1;
+        end
+
+        if (watchdog_enabled == YES && watchdog_finished == YES) begin
+            state <= STATE_IDLE;
+            if (state_is_tx == YES) begin
+                command_ack_valid <= YES;
+                command_ack_error <= YES;
+            end else begin
+                scan_code_error <= YES;
             end
-            STATE_RX: begin
-                watchdog <= watchdog + 1;
+        end
 
-                if (ps2_clk_falling == YES) begin
-                    frame <= frame + 1;
-                    case (frame)
-                        default: begin
-                            scan_code <= {ps2_data, scan_code[7:1]};
-                            parity <= parity ^ ps2_data;
-                        end
-                        FRAME_PARITY: begin
-                            parity <= parity ^ ps2_data;
-                        end
-                        FRAME_STOP: begin
-                            scan_code_valid <= scan_code_success;
-                            error <= ~scan_code_success;
-                        end
-                    endcase
-                end
-
-                if (ps2_clk_rising == YES) begin
-                    if (frame == FRAME_ACK) begin
-                        state <= STATE_IDLE;
-                        frame <= FRAME_BIT_0;
-                    end
-                end
-
-                if (watchdog == WATCHDOG_STOP) begin
-                    state <= STATE_IDLE;
-                    error <= YES;
-                end
-            end
-            STATE_TX: begin
-                watchdog <= watchdog + 1;
-
-                if (frame == FRAME_REQUEST) begin
-                    request <= request + 1;
-                    if (request == REQUEST_STOP) begin
-                        frame <= frame + 1;
-                    end
-                end else if (frame == FRAME_ACK) begin
-                    if (ps2_clk_rising == YES) begin
-                        state <= STATE_IDLE;
-                        frame <= FRAME_BIT_0;
-                        command_ack_valid <= YES;
-                    end
-                end else begin
-                    if (ps2_clk_falling == YES) begin
-                        if (frame == FRAME_START) begin
-                            watchdog <= WATCHDOG_START;
-                        end
-
-                        frame <= frame + 1;
-                        command <= {STOP_BIT, command[9:1]};
-
-                        if (frame == FRAME_STOP) begin
-                            command_ack_error <= ~command_success;
-                        end
-                    end
-                end
-
-                if (watchdog == WATCHDOG_STOP) begin
-                    state <= STATE_IDLE;
-                    command_ack_valid <= YES;
-                    command_ack_error <= YES;
-                end
-            end
-            default: begin
-
-            end
-        endcase
+        // Reset
 
         if (reset_low == LOW) begin
             state <= STATE_IDLE;
-            frame <= FRAME_BIT_0;
-            parity <= LOW;
-            command <= 10'b0;
+
             scan_code_valid <= NO;
             scan_code <= 8'b0;
-            error <= NO;
-            watchdog <= WATCHDOG_START;
-            request <= REQUEST_START;
+            scan_code_parity <= LOW;
+            scan_code_success <= NO;
+            scan_code_error <= NO;
+
+            command <= 10'b0;
+            command_success <= NO;
+            command_ack_valid <= NO;
+            command_ack_error <= NO;
         end
     end
-
-    assign command_ready = (state == STATE_IDLE) && (reset_low == HIGH);
-    assign scan_code_byte = scan_code;
-
-    assign ps2_clk_oe = (state == STATE_TX)
-                       ? (frame == FRAME_REQUEST)
-                       : NO;
-    assign ps2_clk_out = LOW;
-
-    assign ps2_data_oe = (state == STATE_TX)
-                       ? (frame >= FRAME_REQUEST || frame <= FRAME_PARITY)
-                       : NO;
-    assign ps2_data_out = command[0];
 
 endmodule
