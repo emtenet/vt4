@@ -1,0 +1,96 @@
+# Key       Scan Code   Num?    Codes       Shift       Control
+Escape             76           ^[          ...
+Tab                0D           TAB         ^[[Z
+Enter              5A           ENTER       ...         ...
+Backspace          66           BACKSPACE   ^H          ...
+Space              29           SPACE       ...         ^@
+
+`                  0E           `           ~
+0                  45           0           )
+1                  16           1           !
+2                  1E           2           @
+3                  26           3           #
+4                  25           4           $
+5                  2E           5           %
+6                  36           6           ^           ^^
+7                  3D           7           &
+8                  3E           8           *
+9                  46           9           (
+-                  4E           -           _           ^_
+=                  55           =           +
+;                  4C           ;           :
+'                  52           '           "
+,                  41           ,           <
+.                  49           .           >
+/                  4A           /           ?
+A                  1C           a           A           ^A
+B                  32           b           B           ^B
+C                  21           c           C           ^C
+D                  23           d           D           ^D
+E                  24           e           E           ^E
+F                  2B           f           F           ^F
+G                  34           g           G           ^G
+H                  33           h           H           ^H
+I                  43           i           I           ^I
+J                  3B           j           J           ^J
+K                  42           k           K           ^K
+L                  4B           l           L           ^L
+M                  3A           m           M           ^M
+N                  31           n           N           ^N
+O                  44           o           O           ^O
+P                  4D           p           P           ^P
+Q                  15           q           Q           ^Q
+R                  2D           r           R           ^R
+S                  1B           s           S           ^S
+T                  2C           t           T           ^T
+U                  3C           u           U           ^U
+V                  2A           v           V           ^V
+W                  1D           w           W           ^W
+X                  22           x           X           ^X
+Y                  35           y           Y           ^Y
+Z                  1A           z           Z           ^Z
+[                  54           [           {           ^[
+\                  5D           \           |           ^\
+]                  5B           ]           }           ^]
+
+F1                 05           ^[[11~      ^[[23~      ...
+F2                 06           ^[[12~      ^[[24~      ...
+F3                 04           ^[[13~      ^[[25~      ...
+F4                 0C           ^[[14~      ^[[26~      ...
+F5                 03           ^[[15~      ^[[28~      ...
+F6                 0B           ^[[17~      ^[[29~      ...
+F7                 83           ^[[18~      ^[[31~      ...
+F8                 0A           ^[[19~      ^[[32~      ...
+F9                 01           ^[[20~      ^[[33~      ...
+F10                09           ^[[21~      ^[[34~      ...
+F11                78           ^[[23~      ^[[24~      ...
+F12                07           ^[[24~      ^[[24~      ...
+
+Up              E0 75           ^[[A        ...         ^[OA
+Down            E0 72           ^[[B        ...         ^[OB
+Left            E0 6B           ^[[D        ...         ^[OD
+Right           E0 74           ^[[C        ...         ^[OC
+
+Insert          E0 70           ^[[2~       ...
+Delete          E0 71           ^[[3~       ...
+Home            E0 6C           ^[[1~       ...
+End             E0 69           ^[[4~       ...
+Page Up         E0 7D           ^[[5~       ...
+Page Down       E0 7A           ^[[6~       ...
+
+Keypad /           4A           /           ...
+Keypad *           7C           *           ...
+Keypad -           7B           -           ...
+Keypad +           79           +           ...
+Keypad .           71   NUM=.   -> Delete
+Keypad 0           70   NUM=0   -> Insert
+Keypad 1           69   NUM=1   -> End
+Keypad 2           72   NUM=2   -> Down
+Keypad 3           7A   NUM=3   -> Page Down
+Keypad 4           6B   NUM=4   -> Left
+Keypad 5           73   NUM=5   ^[[G        ...         ^[OG
+Keypad 6           74   NUM=6   -> Right
+Keypad 7           6C   NUM=7   -> Home
+Keypad 8           75   NUM=8   -> Up
+Keypad 9           7D   NUM=9   -> Page Up
+Keypad Enter    E0 5A           -> Enter

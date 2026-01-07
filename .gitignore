@@ -2,8 +2,10 @@ char-rom-gen/target
 fpga/build
 fpga/src/char_rom.sv
 fpga/src/vram.sv
+fpga/src/key_code.sv
 fpga/tests/ps2/build
 fpga/tests/ps2/*.vcd
 fpga/tests/ps2/*.surf.ron
+key-code-gen/target
 vram-gen/init.txt
 vram-gen/target
