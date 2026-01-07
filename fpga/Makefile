@@ -15,6 +15,7 @@ src/hdmi_encode.sv \
 src/hdmi_text_mode.sv \
 src/hdmi_timings.sv \
 src/hdmi_tmds.sv \
+src/key_code.sv \
 src/keyboard.sv \
 src/ps2.sv \
 src/timer.sv \

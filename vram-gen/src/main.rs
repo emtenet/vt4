@@ -15,6 +15,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut verilog = String::with_capacity(30000);
     verilog.push_str("`default_nettype none\n");
+    verilog.push_str("`timescale 1ns / 1ps\n");
     verilog.push_str("module vram\n");
     verilog.push_str("(\n");
     verilog.push_str("    input   wire       clk,\n");
@@ -133,7 +134,7 @@ fn main() -> anyhow::Result<()> {
     verilog.push_str("    );\n");
     verilog.push_str("\n");
     verilog.push_str("endmodule\n");
-    std::fs::write("../fpga/src/vram.v", &verilog)?;
+    std::fs::write("../fpga/src/vram.sv", &verilog)?;
 
     Ok(())
 }

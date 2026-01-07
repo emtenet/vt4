@@ -402,11 +402,12 @@ fn read_code(code: &str) -> Result<Code> {
 
 fn key_code(rom: &ROM, verilog: &mut String) {
     verilog.push_str("`default_nettype none\n");
+    verilog.push_str("`timescale 1ns / 1ps\n");
     verilog.push_str("module key_code\n");
     verilog.push_str("(\n");
     verilog.push_str("    input   wire        clk,\n");
     verilog.push_str("\n");
-    verilog.push_str("    input   wire        oe,\n");
+    verilog.push_str("    input   wire        ce,\n");
     verilog.push_str("\n");
     verilog.push_str("    input   wire        extended,\n");
     verilog.push_str("    input   wire [7:0]  scan_code,\n");
@@ -426,7 +427,7 @@ fn key_code(rom: &ROM, verilog: &mut String) {
     verilog.push_str("\n");
     verilog.push_str("    always_comb begin\n");
     verilog.push_str("        addr = {extended, scan_code, num_lock, control, caps_lock, shift, 1'b0};\n");
-    verilog.push_str("        q = {block_3_q[1:0], block_2_q[1:0], block_1_q[1:0], block_0_q[1:0]}\n");
+    verilog.push_str("        q = {block_3_q[1:0], block_2_q[1:0], block_1_q[1:0], block_0_q[1:0]};\n");
     verilog.push_str("    end\n");
     verilog.push_str("\n");
     for block in 0..4 {
@@ -493,5 +494,4 @@ fn key_code(rom: &ROM, verilog: &mut String) {
     verilog.push_str("localparam  KEY_CODE_BRACKET = 5;\n");
     verilog.push_str("localparam  KEY_CODE_LETTER_HI = 4;\n");
     verilog.push_str("localparam  KEY_CODE_LETTER_LO = 0;\n");
-    verilog.push_str("\n");
 }

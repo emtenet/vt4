@@ -73,13 +73,14 @@ fn main() -> anyhow::Result<()> {
 
     let mut verilog = String::with_capacity(30000);
     char_rom(&font, &mut verilog);
-    std::fs::write("../fpga/src/char_rom.v", &verilog)?;
+    std::fs::write("../fpga/src/char_rom.sv", &verilog)?;
 
     Ok(())
 }
 
 fn char_rom(font: &bdf::Font, verilog: &mut String) {
     verilog.push_str("`default_nettype none\n");
+    verilog.push_str("`timescale 1ns / 1ps\n");
     verilog.push_str("module char_rom\n");
     verilog.push_str("(\n");
     verilog.push_str("    input wire clk,\n");
@@ -239,7 +240,7 @@ fn char_rom(font: &bdf::Font, verilog: &mut String) {
     verilog.push_str("        .AD({row[4:0],char[7:0],1'b0})\n");
     verilog.push_str("    );\n");
     verilog.push_str("\n");
-    verilog.push_str("assign q = row[4]\n");
+    verilog.push_str("    assign q = row[4]\n");
     verilog.push_str("        ? (row[3]\n");
     verilog.push_str("            ? 10'b0000000000\n");
     verilog.push_str("            : {block_3_q[1:0], block_2_q[7:0]})\n");
