@@ -28,6 +28,7 @@ module keyboard
 
     localparam  SCROLL_LOCK = NO;
 
+    localparam  SCAN_CODE_SELF_TEST     = 8'hAA;
     localparam  SCAN_CODE_ACKNOWLEDGE   = 8'hFA;
     localparam  SCAN_CODE_CAPS_LOCK     = 8'h58;
     localparam  SCAN_CODE_EXTENDED      = 8'hE0;
@@ -94,8 +95,10 @@ module keyboard
 
     reg [7:0]   scan_code;
     reg         scan_code_extended;
+
     reg         extended;
     reg         released;
+
     reg         caps_lock;
     reg         num_lock;
 
@@ -108,7 +111,7 @@ module keyboard
         released = NO;
 
         caps_lock = NO;
-        num_lock = NO;
+        num_lock = YES;
     end
 
     always_comb begin
@@ -133,6 +136,9 @@ module keyboard
                     if (released == NO) begin
                         set_leds_request_made = YES;
                     end
+                end
+                {SCAN_CODE_SELF_TEST, NORMAL}: begin
+                    set_leds_request_made = YES;
                 end
             endcase
         end
@@ -166,6 +172,9 @@ module keyboard
                     extended <= extended;
                     released <= YES;
                 end
+                {SCAN_CODE_SELF_TEST, NORMAL}: begin
+                    num_lock <= ~num_lock;
+                end
                 default: begin
                     if (released == NO) begin
                         scan_code_ready <= NO;
@@ -194,8 +203,8 @@ module keyboard
             extended <= NO;
             released <= NO;
 
-            num_lock <= NO;
             caps_lock <= NO;
+            num_lock <= YES;
         end
     end
 
