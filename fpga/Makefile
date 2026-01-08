@@ -17,9 +17,11 @@ src/hdmi_timings.sv \
 src/hdmi_tmds.sv \
 src/key_code.sv \
 src/ps2.sv \
+src/ps2_commands.sv \
 src/ps2_protocol.sv \
 src/ps2_physical.sv \
 src/ps2_state.sv \
+src/request_latch.sv \
 src/timer.sv \
 src/top.sv \
 src/vram.sv

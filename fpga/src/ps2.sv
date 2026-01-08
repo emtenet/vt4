@@ -84,7 +84,37 @@ module ps2
         .scan_code_error(scan_code_error)
     );
 
+    wire        acknowledge;
+    wire        resend;
+    wire        set_status;
+    wire        set_status_caps_lock;
+    wire        set_status_num_lock;
+    wire        set_status_scroll_lock;
+
     ps2_state state
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .scan_code_ready(scan_code_ready),
+        .scan_code_valid(scan_code_valid),
+        .scan_code_byte(scan_code_byte),
+
+        .acknowledge(acknowledge),
+
+        .resend(resend),
+
+        .set_status(set_status),
+        .set_status_caps_lock(set_status_caps_lock),
+        .set_status_num_lock(set_status_num_lock),
+        .set_status_scroll_lock(set_status_scroll_lock),
+
+        .character_ready(character_ready),
+        .character_valid(character_valid),
+        .character_byte(character_byte)
+    );
+
+    ps2_commands ps2_commands
     (
         .clk(clk),
         .reset_low(reset_low),
@@ -97,13 +127,14 @@ module ps2
         .command_ack_valid(command_ack_valid),
         .command_ack_error(command_ack_error),
 
-        .scan_code_ready(scan_code_ready),
-        .scan_code_valid(scan_code_valid),
-        .scan_code_byte(scan_code_byte),
+        .acknowledge(acknowledge),
 
-        .character_ready(character_ready),
-        .character_valid(character_valid),
-        .character_byte(character_byte)
+        .resend(resend),
+
+        .set_status(set_status),
+        .set_status_caps_lock(set_status_caps_lock),
+        .set_status_num_lock(set_status_num_lock),
+        .set_status_scroll_lock(set_status_scroll_lock)
     );
 
 endmodule
