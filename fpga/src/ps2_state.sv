@@ -111,7 +111,7 @@ module ps2_state
         released = NO;
 
         caps_lock = NO;
-        num_lock = YES;
+        num_lock = NO;
     end
 
     always_comb begin
@@ -204,7 +204,7 @@ module ps2_state
             released <= NO;
 
             caps_lock <= NO;
-            num_lock <= YES;
+            num_lock <= NO;
         end
     end
 

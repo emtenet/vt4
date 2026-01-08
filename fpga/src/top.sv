@@ -4,8 +4,8 @@ module top
 (
     input wire          xtal,
 
-    inout wire          ps2_clk_pin,
-    inout wire          ps2_data_pin,
+    inout wire          ps2_clk,
+    inout wire          ps2_data,
 
     input wire [1:0]    button,
     output wire [5:0]   led,
@@ -61,36 +61,6 @@ module top
     // );
 
     //==========================================
-    // PS/2 physical pins
-    //==========================================
-
-    wire        ps2_clk_in;
-    wire        ps2_clk_out;
-    wire        ps2_clk_oe;
-
-    IOBUF ps2_clk
-    (
-        .IO(ps2_clk_pin),
-
-        .I(ps2_clk_out),
-        .O(ps2_clk_in),
-        .OEN(~ps2_clk_oe)
-    );
-
-    wire    ps2_data_in;
-    wire    ps2_data_out;
-    wire    ps2_data_oe;
-
-    IOBUF ps2_data
-    (
-        .IO(ps2_data_pin),
-
-        .I(ps2_data_out),
-        .O(ps2_data_in),
-        .OEN(~ps2_data_oe)
-    );
-
-    //==========================================
     // PS/2 frame logic
     //==========================================
 
@@ -103,12 +73,8 @@ module top
         .clk(clk),
         .reset_low(reset_low),
 
-        .ps2_clk_in(ps2_clk_in),
-        .ps2_clk_out(ps2_clk_out),
-        .ps2_clk_oe(ps2_clk_oe),
-        .ps2_data_in(ps2_data_in),
-        .ps2_data_out(ps2_data_out),
-        .ps2_data_oe(ps2_data_oe),
+        .ps2_clk(ps2_clk),
+        .ps2_data(ps2_data),
 
         .character_ready(character_ready),
         .character_valid(character_valid),

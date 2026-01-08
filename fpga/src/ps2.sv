@@ -5,17 +5,45 @@ module ps2
     input   wire        clk,
     input   wire        reset_low,
 
-    input   wire        ps2_clk_in,
-    output  wire        ps2_clk_out,
-    output  wire        ps2_clk_oe,
-    input   wire        ps2_data_in,
-    output  wire        ps2_data_out,
-    output  wire        ps2_data_oe,
+    inout   wire        ps2_clk,
+    inout   wire        ps2_data,
 
     input   wire        character_ready,
     output  wire        character_valid,
     output  wire [7:0]  character_byte,
 );
+
+    wire        ps2_clk_in;
+    wire        ps2_clk_out;
+    wire        ps2_clk_oe;
+
+    ps2_physical for_ps2_clk
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .pin(ps2_clk),
+
+        .in(ps2_clk_in),
+        .out(ps2_clk_out),
+        .oe(ps2_clk_oe)
+    );
+
+    wire        ps2_data_in;
+    wire        ps2_data_out;
+    wire        ps2_data_oe;
+
+    ps2_physical for_ps2_data
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .pin(ps2_data),
+
+        .in(ps2_data_in),
+        .out(ps2_data_out),
+        .oe(ps2_data_oe)
+    );
 
     wire        command_ready;
     wire        command_valid;

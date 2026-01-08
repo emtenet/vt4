@@ -33,47 +33,19 @@ module ps2_protocol
     localparam ODD_PARITY   = HIGH;
 
     //==========================================
-    // Sanitize PS/2 clk & data lines
+    // PS/2 clk falling edge
     //==========================================
 
-    wire        ps2_clk;
-    wire        ps2_data;
     wire        ps2_clk_rising;
     wire        ps2_clk_falling;
     wire        ps2_clk_changed;
-
-    debouncer
-    #(
-        .CYCLES(255)
-    )
-    for_ps2_clk
-    (
-        .clk(clk),
-        .reset_low(reset_low),
-
-        .bit_in(ps2_clk_in),
-        .bit_out(ps2_clk)
-    );
-
-    debouncer
-    #(
-        .CYCLES(255)
-    )
-    for_ps2_data
-    (
-        .clk(clk),
-        .reset_low(reset_low),
-
-        .bit_in(ps2_data_in),
-        .bit_out(ps2_data)
-    );
 
     edge_detector on_ps2_clk
     (
         .clk(clk),
         .reset_low(reset_low),
 
-        .level(ps2_clk),
+        .level(ps2_clk_in),
 
         .pos_edge(ps2_clk_rising),
         .neg_edge(ps2_clk_falling),
@@ -232,7 +204,7 @@ module ps2_protocol
                     watchdog_clear = YES;
                     delay_clear = YES;
                 end else if (ps2_clk_falling == YES) begin
-                    if (ps2_data == START_BIT) begin
+                    if (ps2_data_in == START_BIT) begin
                         did_rx_start = YES;
                         watchdog_clear = YES;
                     end
@@ -364,16 +336,16 @@ module ps2_protocol
         end
 
         if (did_rx_bit == YES) begin
-            scan_code <= {ps2_data, scan_code[7:1]};
+            scan_code <= {ps2_data_in, scan_code[7:1]};
         end
 
         if (did_rx_parity == YES) begin
-            scan_code_parity <= scan_code_parity ^ ps2_data;
+            scan_code_parity <= scan_code_parity ^ ps2_data_in;
         end
 
         if (was_rx_success == YES) begin
             scan_code_success <= (scan_code_parity == ODD_PARITY)
-                              && (ps2_data == STOP_BIT);
+                              && (ps2_data_in == STOP_BIT);
         end
 
         if (did_rx_end == YES) begin
@@ -396,7 +368,7 @@ module ps2_protocol
         end
 
         if (was_tx_success) begin
-            command_success <= (ps2_data == ACK_BIT);
+            command_success <= (ps2_data_in == ACK_BIT);
         end
 
         if (did_tx_end) begin
