@@ -84,8 +84,18 @@ module ps2
         .scan_code_error(scan_code_error)
     );
 
+    wire        scan_code_extended;
+    wire        scan_code_special;
+
+    wire        num_lock;
+    wire        control;
+    wire        caps_lock;
+    wire        shift;
+
     wire        acknowledge;
+
     wire        resend;
+
     wire        set_status;
     wire        set_status_caps_lock;
     wire        set_status_num_lock;
@@ -99,6 +109,13 @@ module ps2
         .scan_code_ready(scan_code_ready),
         .scan_code_valid(scan_code_valid),
         .scan_code_byte(scan_code_byte),
+        .scan_code_extended(scan_code_extended),
+        .scan_code_special(scan_code_special),
+
+        .num_lock(num_lock),
+        .control(control),
+        .caps_lock(caps_lock),
+        .shift(shift),
 
         .acknowledge(acknowledge),
 
@@ -107,11 +124,7 @@ module ps2
         .set_status(set_status),
         .set_status_caps_lock(set_status_caps_lock),
         .set_status_num_lock(set_status_num_lock),
-        .set_status_scroll_lock(set_status_scroll_lock),
-
-        .character_ready(character_ready),
-        .character_valid(character_valid),
-        .character_byte(character_byte)
+        .set_status_scroll_lock(set_status_scroll_lock)
     );
 
     ps2_commands ps2_commands
@@ -135,6 +148,27 @@ module ps2
         .set_status_caps_lock(set_status_caps_lock),
         .set_status_num_lock(set_status_num_lock),
         .set_status_scroll_lock(set_status_scroll_lock)
+    );
+
+    ps2_key_codes key_codes
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .scan_code_ready(scan_code_ready),
+        .scan_code_valid(scan_code_valid),
+        .scan_code_byte(scan_code_byte),
+        .scan_code_extended(scan_code_extended),
+        .scan_code_special(scan_code_special),
+
+        .num_lock(num_lock),
+        .control(control),
+        .caps_lock(caps_lock),
+        .shift(shift),
+
+        .character_ready(character_ready),
+        .character_valid(character_valid),
+        .character_byte(character_byte)
     );
 
 endmodule
