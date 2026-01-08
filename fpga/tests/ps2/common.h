@@ -4,7 +4,7 @@
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 #include <stdio.h>
-#include "Vps2.h"
+#include "Vps2_protocol.h"
 
 #define  FOR_20_ns	1
 #define FOR_100_ns	5
@@ -48,7 +48,7 @@ protected:
 protected:
 	std::unique_ptr<VerilatedContext> cx;
 	std::unique_ptr<VerilatedVcdC> trace;
-    std::unique_ptr<Vps2> model;
+    std::unique_ptr<Vps2_protocol> model;
 private:
 	void assert_start(const char* message, const char* expr, const char* file, int line);
 	void assert_end();
@@ -356,7 +356,7 @@ void SimulationBase::start(int argc, char **argv, const char* waveform) {
 
     trace.reset(new VerilatedVcdC);
 
-    model.reset(new Vps2{cx.get(), "TOP"});
+    model.reset(new Vps2_protocol{cx.get(), "TOP"});
     model->trace(trace.get(), 1);
 
     trace->open(waveform);

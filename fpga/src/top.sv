@@ -94,18 +94,9 @@ module top
     // PS/2 frame logic
     //==========================================
 
-    wire        command_ready;
-    wire        command_valid;
-    wire [7:0]  command_byte;
-
-    wire        command_ack_ready;
-    wire        command_ack_valid;
-    wire        command_ack_error;
-
-    wire        scan_code_ready;
-    wire        scan_code_valid;
-    wire [7:0]  scan_code_byte;
-    wire        scan_code_error;
+    wire        character_ready;
+    wire        character_valid;
+    wire [7:0]  character_byte;
 
     ps2 ps2
     (
@@ -118,45 +109,6 @@ module top
         .ps2_data_in(ps2_data_in),
         .ps2_data_out(ps2_data_out),
         .ps2_data_oe(ps2_data_oe),
-
-        .command_ready(command_ready),
-        .command_valid(command_valid),
-        .command_byte(command_byte),
-
-        .command_ack_ready(command_ack_ready),
-        .command_ack_valid(command_ack_valid),
-        .command_ack_error(command_ack_error),
-
-        .scan_code_ready(scan_code_ready),
-        .scan_code_valid(scan_code_valid),
-        .scan_code_byte(scan_code_byte),
-        .scan_code_error(scan_code_error)
-    );
-
-    //==========================================
-    // PS/2 state
-    //==========================================
-
-    wire        character_ready;
-    wire        character_valid;
-    wire [7:0]  character_byte;
-
-    keyboard keyboard
-    (
-        .clk(clk),
-        .reset_low(reset_low),
-
-        .command_ready(command_ready),
-        .command_valid(command_valid),
-        .command_byte(command_byte),
-
-        .command_ack_ready(command_ack_ready),
-        .command_ack_valid(command_ack_valid),
-        .command_ack_error(command_ack_error),
-
-        .scan_code_ready(scan_code_ready),
-        .scan_code_valid(scan_code_valid),
-        .scan_code_byte(scan_code_byte),
 
         .character_ready(character_ready),
         .character_valid(character_valid),
@@ -239,8 +191,8 @@ module top
         .hdmi_data_p(hdmi_data_p)
     );
 
-    assign led = ~{scan_code_error, 5'b0};
+    // assign led = ~{scan_code_error, 5'b0};
 
-    assign diagnosis = {2'b0, scan_code_error, ~reset_low};
+    // assign diagnosis = {2'b0, scan_code_error, ~reset_low};
 
 endmodule

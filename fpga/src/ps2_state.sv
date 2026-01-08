@@ -1,6 +1,6 @@
 `default_nettype none
 `timescale 1ns / 1ps
-module keyboard
+module ps2_state
 (
     input   wire        clk,
     input   wire        reset_low,
