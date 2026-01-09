@@ -6,6 +6,9 @@ fpga/src/key_code.sv
 fpga/tests/ps2/build
 fpga/tests/ps2/*.vcd
 fpga/tests/ps2/*.surf.ron
+fpga/tests/uart/build
+fpga/tests/uart/*.vcd
+fpga/tests/uart/*.surf.ron
 key-code-gen/target
 vram-gen/init.txt
 vram-gen/target

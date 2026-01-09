@@ -25,6 +25,9 @@ src/ps2_state.sv \
 src/request_latch.sv \
 src/timer.sv \
 src/top.sv \
+src/uart.sv \
+src/uart_rx.sv \
+src/uart_tx.sv \
 src/vram.sv
 
 all: build/bitstream.fs
