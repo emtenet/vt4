@@ -1,10 +1,8 @@
-#include <cstdlib>
-#include <ctime>
-#include "common.h"
+#include "simulation_ps2.h"
 
-class Simulation: public SimulationBase {
+class Simulation: public SimulationPS2 {
 public:
-	Simulation(): SimulationBase() {};
+	Simulation(): SimulationPS2() {};
 	virtual ~Simulation() {};
 	virtual void simulation() override;
 };
@@ -21,20 +19,18 @@ void Simulation::simulation() {
 	SCAN_CODE("ACKNOWLEDGE", 0xFA);
 	SCAN_CODE_handshake();
 
-	cycles(FOR_1_ms);
+	CYCLES(1, ms);
 
 	SCAN_CODE("RELEASED", 0xF0);
 	SCAN_CODE_handshake();
 
-	cycles(FOR_1_ms);
+	CYCLES(1, ms);
 
 	SCAN_CODE("NUM LOCK", 0x77);
 	SCAN_CODE_handshake();
 }
 
 int main(int argc, char **argv) {
-	std::srand(std::time({}));
-
 	Simulation simulation;
 	simulation.start(argc, argv, "set_status.vcd");
 	return 0;

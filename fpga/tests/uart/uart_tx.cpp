@@ -1,9 +1,9 @@
-#include "../simulation.h"
+#include "../simulation_base.h"
 #include "Vtop_tx.h"
 
 // UART at 115200 baud, cycles ~8.68us
-#define	CYCLES_full() cycles(CYCLES_ns(8680))
-#define	CYCLES_half() cycles(CYCLES_ns(8680))
+#define	CYCLES_full() cycles(DURATION(8680, ns))
+#define	CYCLES_half() cycles(DURATION(4340, ns))
 
 #define ASSERT_data_BUSY(msg) \
 	ASSERT_EQ("CANNOT send data " msg, model->data_ready, 0)
@@ -48,7 +48,7 @@ void Simulation::simulation() {
 
 	int start_cycles = 0;
 	while (model->pin == 1) {
-		ASSERT_LT("start TOO long", start_cycles, CYCLES_ms(1));
+		ASSERT_LT("start TOO long", start_cycles, DURATION(1, ms));
 
 		cycle();
 		start_cycles++;
@@ -74,16 +74,25 @@ void Simulation::simulation() {
     model->data_valid = 1;
     model->data_byte = tx_byte;
 
-    CYCLES_full();
-    ASSERT_pin_IS("START bit", 0);
+	start_cycles = 0;
+	while (model->pin == 1) {
+		ASSERT_LT("start TOO long", start_cycles, DURATION(1, ms));
+
+		cycle();
+		start_cycles++;
+	}
     model->data_valid = 0;
     model->data_byte = 0;
+
+	CYCLES_half(); // START bit
 
 	rx_byte = 0;
 	for (int bits = 0; bits < 8; bits++) {
 		CYCLES_full();
 		CData bit = model->pin & 1;
 		rx_byte |= bit << bits;
+		CData tx_bit = (tx_byte >> bits) & 1;
+		ASSERT_EQ("DATA bit", tx_bit, bit);
 	}
 
 	CYCLES_full();

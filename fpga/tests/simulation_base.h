@@ -1,5 +1,5 @@
-#ifndef SIMULATION_H
-#define SIMULATION_H
+#ifndef SIMULATION_BASE_H
+#define SIMULATION_BASE_H
 
 #include <cstdlib>
 #include <ctime>
@@ -9,9 +9,10 @@
 
 // simulation with a 50MHz clock
 #define	TIME_PRECISION -8 // 10ns per half cycle
-#define	CYCLES_ns(ns) (ns / 20)
-#define	CYCLES_us(us) ((1000 * us) / 20)
-#define	CYCLES_ms(ms) ((1000000 * ms) / 20)
+#define	DURATION_ns(ns) (ns / 20)
+#define	DURATION_us(us) ((1000 * us) / 20)
+#define	DURATION_ms(ms) ((1000000 * ms) / 20)
+#define DURATION(count, unit) DURATION_##unit(count)
 
 unsigned bounded_rand(unsigned range)
 {
@@ -38,6 +39,8 @@ public:
 protected:
 	void assert_eq(const char* message, int lhs, int rhs, const char* expr, const char* file, int line);
 	void assert_lt(const char* message, const char* expr, const char* file, int line);
+	void assert_push(const char* file, int line);
+	void assert_pop();
 	void cycle();
 	void cycles(int cycles);
 protected:
@@ -47,8 +50,6 @@ protected:
 private:
 	void assert_start(const char* message, const char* expr, const char* file, int line);
 	void assert_end();
-	void assert_push(const char* file, int line);
-	void assert_pop();
 	void cycle_initial();
 	void cycle_final();
 private:
@@ -80,7 +81,7 @@ SimulationBase<V>::~SimulationBase() {
 	if ((lhs) >= (rhs)) { \
 		assert_lt(message, #lhs " < " #rhs, __FILE__, __LINE__); \
 	}
-#define CYCLES(count, unit) cycles(CYCLES_##unit(count))
+#define CYCLES(count, unit) cycles(DURATION(count, unit))
 
 template<class V>
 void SimulationBase<V>::assert_eq(const char* message, int lhs, int rhs, const char* expr, const char* file, int line) {

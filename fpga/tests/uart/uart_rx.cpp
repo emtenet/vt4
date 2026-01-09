@@ -1,8 +1,8 @@
-#include "../simulation.h"
+#include "../simulation_base.h"
 #include "Vtop_rx.h"
 
 // UART at 115200 baud, cycles ~8.68us
-#define	CYCLES_uart() cycles(CYCLES_ns(8680))
+#define	CYCLES_uart() cycles(DURATION(8680, ns))
 
 #define ASSERT_data_VALID(msg) \
 	ASSERT_EQ("data is VALID " msg, model->data_valid, 1)
@@ -54,7 +54,7 @@ void Simulation::simulation() {
 
 	int stop_cycles = 0;
 	while (model->data_valid == 0) {
-		ASSERT_LT("stop TOO long", stop_cycles, CYCLES_ms(1));
+		ASSERT_LT("stop TOO long", stop_cycles, DURATION(1, ms));
 
 		cycle();
 		stop_cycles++;

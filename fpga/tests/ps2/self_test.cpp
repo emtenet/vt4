@@ -1,8 +1,8 @@
-#include "common.h"
+#include "simulation_ps2.h"
 
-class Simulation: public SimulationBase {
+class Simulation: public SimulationPS2 {
 public:
-	Simulation(): SimulationBase() {};
+	Simulation(): SimulationPS2() {};
 	virtual ~Simulation() {};
 	virtual void simulation() override;
 };
@@ -10,7 +10,7 @@ public:
 void Simulation::simulation() {
 	SCAN_CODE("self test", 0xAA);
 
-	cycles(FOR_100_us);
+	CYCLES(100, us);
 
 	SCAN_CODE_handshake();
 }

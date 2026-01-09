@@ -1,10 +1,8 @@
-#include <cstdlib>
-#include <ctime>
-#include "common.h"
+#include "simulation_ps2.h"
 
-class Simulation: public SimulationBase {
+class Simulation: public SimulationPS2 {
 public:
-	Simulation(): SimulationBase() {};
+	Simulation(): SimulationPS2() {};
 	virtual ~Simulation() {};
 	virtual void simulation() override;
 };
@@ -12,26 +10,24 @@ public:
 void Simulation::simulation() {
 	COMMAND("RESET", 0x96); // FF);
 
-	cycles(FOR_100_us);
+	CYCLES(100, us);
 
 	SCAN_CODE("acknowledge", 0xFA);
 
-	cycles(FOR_10_us);
+	CYCLES(10, us);
 
 	SCAN_CODE_handshake();
 
-	cycles(FOR_1_ms);
+	CYCLES(1, ms);
 
 	SCAN_CODE("self test", 0xAA);
 
-	cycles(FOR_100_us);
+	CYCLES(100, us);
 
 	SCAN_CODE_handshake();
 }
 
 int main(int argc, char **argv) {
-	std::srand(std::time({}));
-
 	Simulation simulation;
 	simulation.start(argc, argv, "reset.vcd");
 	return 0;
