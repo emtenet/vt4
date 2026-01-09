@@ -53,5 +53,8 @@ flash: build/bitstream.fs
 lint: ${VERILOG}
 	verilator -lint-only -Wall -Isrc ${VERILOG}
 
-.PHONY: all sram flash lint
+uart:
+	sudo minicom --baudrate 115200 --device /dev/ttyUSB1
+
+.PHONY: all sram flash lint uart
 INTERMEDIATE: build/synth.json build/pnr.json

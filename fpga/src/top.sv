@@ -7,6 +7,9 @@ module top
     inout wire          ps2_clk,
     inout wire          ps2_data,
 
+    input wire          uart_rx,
+    output wire         uart_tx,
+
     input wire [1:0]    button,
     output wire [5:0]   led,
     output wire [3:0]   diagnosis,
@@ -64,9 +67,13 @@ module top
     // PS/2 frame logic
     //==========================================
 
-    wire        character_ready;
-    wire        character_valid;
-    wire [7:0]  character_byte;
+    wire        key_code_ready;
+    wire        key_code_valid;
+    wire [7:0]  key_code_byte;
+
+    wire        screen_code_ready;
+    wire        screen_code_valid;
+    wire [7:0]  screen_code_byte;
 
     ps2 ps2
     (
@@ -76,21 +83,31 @@ module top
         .ps2_clk(ps2_clk),
         .ps2_data(ps2_data),
 
-        .character_ready(character_ready),
-        .character_valid(character_valid),
-        .character_byte(character_byte)
+        .character_ready(key_code_ready),
+        .character_valid(key_code_valid),
+        .character_byte(key_code_byte)
     );
 
-    // uart
-    // #(
-    //     .CLK(51_800_000),
-    //     .BAUD(115200)
-    // )
-    // uart
-    // (
-    //     .clk(clk),
-    //     reset_low(reset_low),
-    // ).
+    uart
+    #(
+        .CLK(51_800_000),
+        .BAUD(115200)
+    )
+    uart
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .rx_pin(uart_rx),
+        .rx_ready(screen_code_ready),
+        .rx_valid(screen_code_valid),
+        .rx_byte(screen_code_byte),
+
+        .tx_pin(uart_tx),
+        .tx_ready(key_code_ready),
+        .tx_valid(key_code_valid),
+        .tx_byte(key_code_byte)
+    );
 
     //==========================================
     // VRAM
@@ -134,9 +151,9 @@ module top
         .clk(clk),
         .reset_low(reset_low),
 
-        .character_ready(character_ready),
-        .character_valid(character_valid),
-        .character_byte(character_byte),
+        .character_ready(screen_code_ready),
+        .character_valid(screen_code_valid),
+        .character_byte(screen_code_byte),
 
         .write_ready(vram_write_ready),
         .write_valid(vram_write_valid),

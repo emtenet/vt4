@@ -37,7 +37,7 @@ module uart
 
     uart_rx
     #(
-        .CLK(CLK)
+        .CLK(CLK),
         .BAUD(BAUD)
     )
     uart_rx
@@ -54,7 +54,7 @@ module uart
 
     uart_tx
     #(
-        .CLK(CLK)
+        .CLK(CLK),
         .BAUD(BAUD)
     )
     uart_tx
