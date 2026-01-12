@@ -88,30 +88,30 @@ module top
         .character_byte(key_code_byte)
     );
 
-    // uart
-    // #(
-    //     .CLK(51_800_000),
-    //     .BAUD(115200)
-    // )
-    // uart
-    // (
-    //     .clk(clk),
-    //     .reset_low(reset_low),
+    uart
+    #(
+        .CLK(51_800_000),
+        .BAUD(115200)
+    )
+    uart
+    (
+        .clk(clk),
+        .reset_low(reset_low),
 
-    //     .rx_pin(uart_rx),
-    //     .rx_ready(screen_code_ready),
-    //     .rx_valid(screen_code_valid),
-    //     .rx_byte(screen_code_byte),
+        .rx_pin(uart_rx),
+        .rx_ready(screen_code_ready),
+        .rx_valid(screen_code_valid),
+        .rx_byte(screen_code_byte),
 
-    //     .tx_pin(uart_tx),
-    //     .tx_ready(key_code_ready),
-    //     .tx_valid(key_code_valid),
-    //     .tx_byte(key_code_byte)
-    // );
+        .tx_pin(uart_tx),
+        .tx_ready(key_code_ready),
+        .tx_valid(key_code_valid),
+        .tx_byte(key_code_byte)
+    );
 
-    assign screen_code_ready = key_code_ready;
-    assign screen_code_valid = key_code_valid;
-    assign screen_code_byte = key_code_byte;
+    // assign screen_code_ready = key_code_ready;
+    // assign screen_code_valid = key_code_valid;
+    // assign screen_code_byte = key_code_byte;
 
     //==========================================
     // VRAM
