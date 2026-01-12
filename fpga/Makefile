@@ -5,7 +5,6 @@ DEVICE=GW1NR-LV9QN88PC6/I5
 VERILOG= src/types.sv \
 src/button_handshake.sv \
 src/char_rom.sv \
-src/character_writer.sv \
 src/clock_synchronizer.sv \
 src/debouncer.sv \
 src/edge_detector.sv \
@@ -28,7 +27,8 @@ src/top.sv \
 src/uart.sv \
 src/uart_rx.sv \
 src/uart_tx.sv \
-src/vram.sv
+src/vram.sv \
+src/vt.sv
 
 all: build/bitstream.fs
 

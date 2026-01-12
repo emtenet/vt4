@@ -88,26 +88,30 @@ module top
         .character_byte(key_code_byte)
     );
 
-    uart
-    #(
-        .CLK(51_800_000),
-        .BAUD(115200)
-    )
-    uart
-    (
-        .clk(clk),
-        .reset_low(reset_low),
+    // uart
+    // #(
+    //     .CLK(51_800_000),
+    //     .BAUD(115200)
+    // )
+    // uart
+    // (
+    //     .clk(clk),
+    //     .reset_low(reset_low),
 
-        .rx_pin(uart_rx),
-        .rx_ready(screen_code_ready),
-        .rx_valid(screen_code_valid),
-        .rx_byte(screen_code_byte),
+    //     .rx_pin(uart_rx),
+    //     .rx_ready(screen_code_ready),
+    //     .rx_valid(screen_code_valid),
+    //     .rx_byte(screen_code_byte),
 
-        .tx_pin(uart_tx),
-        .tx_ready(key_code_ready),
-        .tx_valid(key_code_valid),
-        .tx_byte(key_code_byte)
-    );
+    //     .tx_pin(uart_tx),
+    //     .tx_ready(key_code_ready),
+    //     .tx_valid(key_code_valid),
+    //     .tx_byte(key_code_byte)
+    // );
+
+    assign screen_code_ready = key_code_ready;
+    assign screen_code_valid = key_code_valid;
+    assign screen_code_byte = key_code_byte;
 
     //==========================================
     // VRAM
@@ -146,20 +150,30 @@ module top
     // Write characters to VRAM
     //==========================================
 
-    character_writer character_writer
+    wire [4:0]  top_row;
+
+    wire [4:0]  cursor_row;
+    wire [6:0]  cursor_col;
+
+    vt vt
     (
         .clk(clk),
         .reset_low(reset_low),
 
-        .character_ready(screen_code_ready),
-        .character_valid(screen_code_valid),
-        .character_byte(screen_code_byte),
+        .host_ready(screen_code_ready),
+        .host_valid(screen_code_valid),
+        .host_byte(screen_code_byte),
 
-        .write_ready(vram_write_ready),
-        .write_valid(vram_write_valid),
-        .write_row(vram_write_row),
-        .write_col(vram_write_col),
-        .write_byte(vram_write_byte)
+        .vram_ready(vram_write_ready),
+        .vram_valid(vram_write_valid),
+        .vram_row(vram_write_row),
+        .vram_col(vram_write_col),
+        .vram_byte(vram_write_byte),
+
+        .top_row(top_row),
+
+        .cursor_row(cursor_row),
+        .cursor_col(cursor_col)
     );
 
     //==========================================
@@ -172,7 +186,10 @@ module top
         .clk_5x(clk_5x),
         .reset_low(reset_low),
 
-        .top_row(5'd0),
+        .top_row(top_row),
+
+        .cursor_row(cursor_row),
+        .cursor_col(cursor_col),
 
         .vram_valid(vram_read_valid),
         .vram_row(vram_read_row),

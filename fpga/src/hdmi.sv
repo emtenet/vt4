@@ -13,6 +13,9 @@ module hdmi
     output  wire [6:0]  vram_col,
     input   wire [7:0]  vram_byte,
 
+    input   wire [4:0]  cursor_row,
+    input   wire [6:0]  cursor_col,
+
     output  wire        hdmi_clk_n,
     output  wire        hdmi_clk_p,
     output  wire [2:0]  hdmi_data_n,
@@ -79,6 +82,7 @@ module hdmi
     reg [4:0]   stage2_row_pixel;
     reg         stage2_col_start;
     wire [7:0]  stage2_byte;
+    reg         stage2_invert;
 
     always_comb begin
         vram_valid = stage1_col_start;
@@ -93,6 +97,10 @@ module hdmi
         stage2_v_sync <= stage1_v_sync;
         stage2_row_pixel <= stage1_row_pixel;
         stage2_col_start <= stage1_col_start;
+        stage2_invert = NO;
+        if (stage1_row == cursor_row && stage1_col == cursor_col) begin
+            stage2_invert = YES;
+        end
     end
 
     // get horizontal pixels for char
@@ -101,6 +109,7 @@ module hdmi
     reg         stage3_v_sync;
     reg         stage3_active;
     reg         stage3_col_start;
+    reg         stage3_invert;
     wire [9:0]  stage3_pixels;
 
     always_ff @(posedge clk) begin
@@ -108,6 +117,7 @@ module hdmi
         stage3_h_sync <= stage2_h_sync;
         stage3_v_sync <= stage2_v_sync;
         stage3_col_start <= stage2_col_start;
+        stage3_invert <= stage2_invert;
     end
 
     char_rom char_rom
@@ -134,7 +144,11 @@ module hdmi
 
         // shift through char pixels
         if (stage3_col_start) begin
-            stage4_pixels <= stage3_pixels;
+            if (stage3_invert == YES) begin
+                stage4_pixels <= ~stage3_pixels;
+            end else begin
+                stage4_pixels <= stage3_pixels;
+            end
         end else begin
             stage4_pixels <= {stage4_pixels[8:0], 1'b0};
         end
