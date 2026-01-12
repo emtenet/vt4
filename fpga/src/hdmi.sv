@@ -80,14 +80,14 @@ module hdmi
     reg         stage2_col_start;
     wire [7:0]  stage2_byte;
 
-    always @(*) begin
+    always_comb begin
         vram_valid = stage1_col_start;
         vram_row = stage1_row;
         vram_col = stage1_col;
         stage2_byte = vram_byte;
     end
 
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         stage2_active <= stage1_active;
         stage2_h_sync <= stage1_h_sync;
         stage2_v_sync <= stage1_v_sync;
@@ -103,7 +103,7 @@ module hdmi
     reg         stage3_col_start;
     wire [9:0]  stage3_pixels;
 
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         stage3_active <= stage2_active;
         stage3_h_sync <= stage2_h_sync;
         stage3_v_sync <= stage2_v_sync;
@@ -127,19 +127,20 @@ module hdmi
     reg [9:0]   stage4_pixels;
     wire        stage4_pixel;
 
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         stage4_active <= stage3_active;
         stage4_h_sync <= stage3_h_sync;
         stage4_v_sync <= stage3_v_sync;
 
         // shift through char pixels
-        if (stage3_col_start)
+        if (stage3_col_start) begin
             stage4_pixels <= stage3_pixels;
-        else
+        end else begin
             stage4_pixels <= {stage4_pixels[8:0], 1'b0};
+        end
     end
 
-    always @(*) begin
+    always_comb begin
         stage4_pixel = stage4_pixels[9];
     end
 
