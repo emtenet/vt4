@@ -39,10 +39,10 @@ IO_PORT "button[0]" IO_TYPE=LVCMOS18;
 IO_LOC "button[1]" 4;
 IO_PORT "button[1]" IO_TYPE=LVCMOS18;
 //
-IO_LOC "uart_tx" 17;
-IO_PORT "uart_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart_rx" 18;
-IO_PORT "uart_rx" IO_TYPE=LVCMOS33;
+//IO_LOC "uart_tx" 17;
+//IO_PORT "uart_tx" IO_TYPE=LVCMOS33;
+//IO_LOC "uart_rx" 18;
+//IO_PORT "uart_rx" IO_TYPE=LVCMOS33;
 //
 IO_LOC "ps2_clk" 37;
 IO_PORT "ps2_clk" IO_TYPE=LVCMOS33 PULL_MODE=NONE OPEN_DRAIN=ON;
@@ -57,3 +57,8 @@ IO_LOC "diagnosis[1]" 25;
 IO_PORT "diagnosis[1]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
 IO_LOC "diagnosis[0]" 26;
 IO_PORT "diagnosis[0]" IO_TYPE=LVCMOS33 PULL_MODE=DOWN;
+//
+IO_LOC "uart_tx" 28;
+IO_PORT "uart_tx" IO_TYPE=LVCMOS33;
+IO_LOC "uart_rx" 29;
+IO_PORT "uart_rx" IO_TYPE=LVCMOS33;
