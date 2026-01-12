@@ -78,12 +78,13 @@ module hdmi
     reg         stage2_v_sync;
     reg [4:0]   stage2_row_pixel;
     reg         stage2_col_start;
-    reg [7:0]   stage2_byte;
+    wire [7:0]  stage2_byte;
 
     always @(*) begin
         vram_valid = stage1_col_start;
         vram_row = stage1_row;
         vram_col = stage1_col;
+        stage2_byte = vram_byte;
     end
 
     always @(posedge clk) begin
@@ -92,7 +93,6 @@ module hdmi
         stage2_v_sync <= stage1_v_sync;
         stage2_row_pixel <= stage1_row_pixel;
         stage2_col_start <= stage1_col_start;
-        stage2_byte <= vram_byte;
     end
 
     // get horizontal pixels for char
