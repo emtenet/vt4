@@ -8602,6 +8602,30 @@
 		(layer "Edge.Cuts")
 		(uuid "d8a0cc7e-54e5-4d8f-8236-4c141babb704")
 	)
+	(gr_text "2026-01-14"
+		(at 170.5 67 0)
+		(layer "F.SilkS")
+		(uuid "4f387f2a-39b4-41ed-993e-6f9ea35039cb")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.125)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "Video Terminal 4"
+		(at 170 65 0)
+		(layer "F.SilkS")
+		(uuid "7fd94fc0-4549-42da-967f-36771ad22bbc")
+		(effects
+			(font
+				(size 2 2)
+				(thickness 0.2)
+			)
+			(justify left bottom)
+		)
+	)
 	(segment
 		(start 147.501 85.07142)
 		(end 147.501 86.9365)
