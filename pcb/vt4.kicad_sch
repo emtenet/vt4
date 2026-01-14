@@ -298,7 +298,7 @@
 			)
 			(symbol "Tang_Nano_9K_1_1"
 				(text "Tang Nano 9k"
-					(at 0 27.178 0)
+					(at 0.254 28.702 0)
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -704,7 +704,7 @@
 				(pin bidirectional line
 					(at -17.78 -27.94 0)
 					(length 2.54)
-					(name "PIN68"
+					(name "PIN68_HDMI_CLK-"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -722,7 +722,7 @@
 				(pin bidirectional line
 					(at -17.78 -30.48 0)
 					(length 2.54)
-					(name "PIN69"
+					(name "PIN69_HDMI_CLK+"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -758,7 +758,7 @@
 				(pin bidirectional line
 					(at 17.78 25.4 180)
 					(length 2.54)
-					(name "PIN86"
+					(name "(1V8)_PIN86"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -776,7 +776,7 @@
 				(pin bidirectional line
 					(at 17.78 22.86 180)
 					(length 2.54)
-					(name "PIN85"
+					(name "(1V8)_PIN85"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -794,7 +794,7 @@
 				(pin bidirectional line
 					(at 17.78 20.32 180)
 					(length 2.54)
-					(name "PIN84"
+					(name "(1V8)_PIN84"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -812,7 +812,7 @@
 				(pin bidirectional line
 					(at 17.78 17.78 180)
 					(length 2.54)
-					(name "PIN83"
+					(name "(1V8)_PIN83"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -830,7 +830,7 @@
 				(pin bidirectional line
 					(at 17.78 15.24 180)
 					(length 2.54)
-					(name "PIN82"
+					(name "(1V8)_PIN82"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -848,7 +848,7 @@
 				(pin bidirectional line
 					(at 17.78 12.7 180)
 					(length 2.54)
-					(name "PIN81"
+					(name "(1V8)_PIN81"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -866,7 +866,7 @@
 				(pin bidirectional line
 					(at 17.78 10.16 180)
 					(length 2.54)
-					(name "PIN80"
+					(name "(1V8)_PIN80"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -884,7 +884,7 @@
 				(pin bidirectional line
 					(at 17.78 7.62 180)
 					(length 2.54)
-					(name "PIN79"
+					(name "(1v8)_PIN79"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -938,7 +938,7 @@
 				(pin bidirectional line
 					(at 17.78 0 180)
 					(length 2.54)
-					(name "PIN75"
+					(name "HDMI_R+_PIN75"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -956,7 +956,7 @@
 				(pin bidirectional line
 					(at 17.78 -2.54 180)
 					(length 2.54)
-					(name "PIN74"
+					(name "HDMI_R-_PIN74"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -974,7 +974,7 @@
 				(pin bidirectional line
 					(at 17.78 -5.08 180)
 					(length 2.54)
-					(name "PIN73"
+					(name "HDMI_G+_PIN73"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -992,7 +992,7 @@
 				(pin bidirectional line
 					(at 17.78 -7.62 180)
 					(length 2.54)
-					(name "PIN72"
+					(name "HDMI_G-_PIN72"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1010,7 +1010,7 @@
 				(pin bidirectional line
 					(at 17.78 -10.16 180)
 					(length 2.54)
-					(name "PIN71"
+					(name "HDMI_B+_PIN71"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1028,7 +1028,7 @@
 				(pin bidirectional line
 					(at 17.78 -12.7 180)
 					(length 2.54)
-					(name "PIN70"
+					(name "HDMI_B-_PIN70"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4646,16 +4646,8 @@
 		(uuid "a9c330ac-c6c7-4452-a9de-f0311418c390")
 	)
 	(no_connect
-		(at 132.08 109.22)
-		(uuid "0412990d-78c5-4171-99d6-a97833c82b63")
-	)
-	(no_connect
 		(at 115.57 173.99)
 		(uuid "0b144a18-fe7e-4b46-9d1b-120a56c321cc")
-	)
-	(no_connect
-		(at 132.08 99.06)
-		(uuid "10f7435c-20aa-4e91-bb9a-1bbc4e9b3300")
 	)
 	(no_connect
 		(at 96.52 101.6)
@@ -4746,10 +4738,6 @@
 		(uuid "68f6f42f-11b8-4fc6-9ac7-9c5a53a51944")
 	)
 	(no_connect
-		(at 132.08 104.14)
-		(uuid "6b73a8ee-d827-4b93-9123-c26f24496d81")
-	)
-	(no_connect
 		(at 31.75 39.37)
 		(uuid "6f60f30b-be0d-413c-89f9-9eff22ede820")
 	)
@@ -4762,16 +4750,8 @@
 		(uuid "821373fc-537d-4454-96ac-d777e858b739")
 	)
 	(no_connect
-		(at 132.08 101.6)
-		(uuid "8513b4c7-4e03-4dcd-ac54-93d4d21eed14")
-	)
-	(no_connect
 		(at 96.52 68.58)
 		(uuid "854ccb43-e123-4f72-aa0d-af3d6536db78")
-	)
-	(no_connect
-		(at 96.52 116.84)
-		(uuid "88ee4e9b-33c2-41d1-80d0-8ed2d610b375")
 	)
 	(no_connect
 		(at 255.27 24.13)
@@ -4796,10 +4776,6 @@
 	(no_connect
 		(at 255.27 41.91)
 		(uuid "a77174d7-a368-4b34-9e32-3d97fab9cca5")
-	)
-	(no_connect
-		(at 96.52 114.3)
-		(uuid "a82e5a75-a1c5-4399-a6f4-0f4eb83613a9")
 	)
 	(no_connect
 		(at 96.52 83.82)
@@ -4828,10 +4804,6 @@
 	(no_connect
 		(at 255.27 67.31)
 		(uuid "bcf065e9-efd6-4aa6-9846-4687a499fffb")
-	)
-	(no_connect
-		(at 132.08 106.68)
-		(uuid "c31d9910-60ae-4e75-ac23-69143b7fbba3")
 	)
 	(no_connect
 		(at 132.08 93.98)
@@ -4905,10 +4877,6 @@
 		(at 96.52 104.14)
 		(uuid "f97e5128-e3fa-478c-ac10-27707bf66362")
 	)
-	(no_connect
-		(at 132.08 96.52)
-		(uuid "fe7f2fbd-3326-4915-a0dd-c50a15228931")
-	)
 	(wire
 		(pts
 			(xy 33.02 63.5) (xy 33.02 66.04)
@@ -4931,6 +4899,16 @@
 	)
 	(wire
 		(pts
+			(xy 132.08 96.52) (xy 134.62 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "06bb00f3-2356-40ff-9d67-278a1f405d3e")
+	)
+	(wire
+		(pts
 			(xy 30.48 63.5) (xy 33.02 63.5)
 		)
 		(stroke
@@ -4938,16 +4916,6 @@
 			(type default)
 		)
 		(uuid "0c02e3c6-718b-4136-981a-1a8a45291cff")
-	)
-	(wire
-		(pts
-			(xy 93.98 124.46) (xy 96.52 124.46)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0cc51d40-6938-4ed0-8fb9-ce86333b6869")
 	)
 	(wire
 		(pts
@@ -4988,16 +4956,6 @@
 			(type default)
 		)
 		(uuid "105f8ae8-f098-4733-b549-5123255468c7")
-	)
-	(wire
-		(pts
-			(xy 93.98 119.38) (xy 96.52 119.38)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "141b8570-a2a7-4c0a-b453-8985ae2342f2")
 	)
 	(wire
 		(pts
@@ -5048,6 +5006,16 @@
 			(type default)
 		)
 		(uuid "1741a03a-8f78-4fba-b390-41f15f13d758")
+	)
+	(wire
+		(pts
+			(xy 132.08 106.68) (xy 134.62 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "17da8dea-1bc0-4680-a2b4-32e2f24cbec9")
 	)
 	(wire
 		(pts
@@ -5471,6 +5439,16 @@
 	)
 	(wire
 		(pts
+			(xy 132.08 99.06) (xy 134.62 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "583de4c4-3f40-44dd-ba7b-085bb973da68")
+	)
+	(wire
+		(pts
 			(xy 226.06 29.21) (xy 226.06 30.48)
 		)
 		(stroke
@@ -5508,6 +5486,16 @@
 			(type default)
 		)
 		(uuid "5e27f3a1-9d44-429a-a048-8ededcbc24db")
+	)
+	(wire
+		(pts
+			(xy 132.08 104.14) (xy 134.62 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5fbf9bbe-b3db-4045-89d8-a9b779c0e728")
 	)
 	(wire
 		(pts
@@ -5781,6 +5769,16 @@
 	)
 	(wire
 		(pts
+			(xy 93.98 124.46) (xy 96.52 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "83a52492-f8b9-4783-a537-1b17284fde9c")
+	)
+	(wire
+		(pts
 			(xy 125.73 158.75) (xy 128.27 158.75)
 		)
 		(stroke
@@ -5828,6 +5826,16 @@
 			(type default)
 		)
 		(uuid "8c91387b-44a6-4cb9-8fc6-7c88e3347bb3")
+	)
+	(wire
+		(pts
+			(xy 93.98 127) (xy 96.52 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8edeaa4b-aa61-46d5-8f83-ac0e5a187443")
 	)
 	(wire
 		(pts
@@ -5891,16 +5899,6 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 127) (xy 96.52 127)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9b7f630c-b130-4f9e-a176-a7f14113fac6")
-	)
-	(wire
-		(pts
 			(xy 181.61 64.77) (xy 184.15 64.77)
 		)
 		(stroke
@@ -5908,6 +5906,26 @@
 			(type default)
 		)
 		(uuid "9d457b31-8297-4cf7-a66c-434ae5abdc0d")
+	)
+	(wire
+		(pts
+			(xy 132.08 109.22) (xy 134.62 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9f73d393-bd65-46ed-978b-8c175525b85f")
+	)
+	(wire
+		(pts
+			(xy 132.08 101.6) (xy 134.62 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a17b2fb8-ed64-4013-a447-3d9bee182bd7")
 	)
 	(wire
 		(pts
@@ -6311,16 +6329,6 @@
 	)
 	(wire
 		(pts
-			(xy 93.98 121.92) (xy 96.52 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fa6b54fd-cb59-48f8-b1ba-f88de5032a4e")
-	)
-	(wire
-		(pts
 			(xy 93.98 78.74) (xy 96.52 78.74)
 		)
 		(stroke
@@ -6471,7 +6479,7 @@
 	)
 	(global_label "UART 2 TX"
 		(shape output)
-		(at 93.98 121.92 180)
+		(at 96.52 116.84 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6481,7 +6489,7 @@
 		)
 		(uuid "35e7c7b1-9fb1-461c-81c5-ec95c2c5b6cb")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 81.0163 121.92 0)
+			(at 83.5563 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6548,6 +6556,28 @@
 		(uuid "45cd2ff9-5944-49d1-8561-a15adc52ad93")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 67.052 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "HDMI B +"
+		(shape passive)
+		(at 134.62 106.68 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "46ab03d8-9741-4989-8808-24757001f72e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 145.9282 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6669,7 +6699,7 @@
 	)
 	(global_label "UART 2 RX"
 		(shape input)
-		(at 93.98 119.38 180)
+		(at 96.52 114.3 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6679,7 +6709,51 @@
 		)
 		(uuid "7cbadba3-7525-4db8-a8d1-c6fcd3af03c4")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 80.7139 119.38 0)
+			(at 83.2539 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "HDMI CLK -"
+		(shape passive)
+		(at 93.98 124.46 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "855d6969-7cda-4600-85d0-033ce6a8d494")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 80.3737 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "HDMI CLK +"
+		(shape passive)
+		(at 93.98 127 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "85abc1b2-a2dd-4c3c-9c3e-da59277daa61")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 80.3737 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6773,6 +6847,28 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "HDMI G -"
+		(shape passive)
+		(at 134.62 104.14 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "971573df-3037-499d-849b-783b46538f2d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 145.9282 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -6889,7 +6985,7 @@
 	)
 	(global_label "UART 1 TX"
 		(shape output)
-		(at 93.98 124.46 180)
+		(at 96.52 119.38 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6899,7 +6995,7 @@
 		)
 		(uuid "ae16541f-e263-49a2-96a2-92377f19952f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 81.0163 124.46 0)
+			(at 83.5563 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6911,7 +7007,7 @@
 	)
 	(global_label "UART 1 RX"
 		(shape input)
-		(at 93.98 127 180)
+		(at 96.52 121.92 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6921,12 +7017,34 @@
 		)
 		(uuid "ae87e15c-d36b-42cb-b30f-60d272eb48bb")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 80.7139 127 0)
+			(at 83.2539 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "HDMI B -"
+		(shape passive)
+		(at 134.62 109.22 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "bc5e057f-79ef-43fa-89f6-451bf4214092")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 145.9282 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -7019,6 +7137,28 @@
 			)
 		)
 	)
+	(global_label "HDMI G +"
+		(shape passive)
+		(at 134.62 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "de07b411-0c1c-4034-827d-ec8e0eb74098")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 145.9282 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "FeRAM SCLK"
 		(shape output)
 		(at 134.62 76.2 0)
@@ -7032,6 +7172,50 @@
 		(uuid "e83f3608-c35d-4341-92ac-e683f13d1f97")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 149.3376 76.2 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "HDMI R -"
+		(shape passive)
+		(at 134.62 99.06 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e9d324be-245d-4c13-8337-8c9a5a26a033")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 145.9282 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "HDMI R +"
+		(shape passive)
+		(at 134.62 96.52 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "eb69b2b2-23d3-4147-82e2-624db3348373")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 145.9282 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
