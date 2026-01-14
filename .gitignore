@@ -10,5 +10,9 @@ fpga/tests/uart/build
 fpga/tests/uart/*.vcd
 fpga/tests/uart/*.surf.ron
 key-code-gen/target
+pcb/*.bak
+pcb/*-cache
+pcb/output
+pcb/vt4-backups
 vram-gen/init.txt
 vram-gen/target
