@@ -1,10 +1,9 @@
-(footprint "DSUB-9_Pins_Horizontal"
+(footprint "DSUB_9_Pins_Female_Horizontal"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
 	(layer "F.Cu")
-	(descr "9-pin D-Sub connector, horizontal/angled (90 deg), THT-mount, pins (male), pitch 2.77x2.84mm, pin-PCB-offset 7.7mm, distance of mounting holes 25mm, distance of mounting holes to PCB edge 9.12mm, see https://disti-assets.s3.amazonaws.com/tonar/files/datasheets/16730.pdf")
-	(tags "9-pin D-Sub connector horizontal angled 90deg THT pins pitch 2.77x2.84mm pin-PCB-offset 7.7mm mounting-holes-distance 25mm mounting-hole-offset 9.12mm")
+	(descr "Female 9-pin D-Sub connector, horizontal/angled (90 deg), THT-mount, pitch 2.77x2.84mm, pin-PCB-offset 7.7mm, distance of mounting holes 25mm, distance of mounting holes to PCB edge 9.12mm, see https://disti-assets.s3.amazonaws.com/tonar/files/datasheets/16730.pdf")
 	(property "Reference" "REF**"
 		(at 5.54 -2.8 0)
 		(layer "F.SilkS")
@@ -16,7 +15,7 @@
 			)
 		)
 	)
-	(property "Value" "DSUB-9_Pins_Horizontal"
+	(property "Value" "Female DSUB 9-Pins Horizontal"
 		(at 5.54 18.44 0)
 		(layer "F.Fab")
 		(uuid "e2a647f1-4315-487c-bca6-6de7abe67b35")
@@ -73,8 +72,8 @@
 		(uuid "20107c98-a2ff-46c0-a4a6-20f84902bc8f")
 	)
 	(fp_line
-		(start -0.25 -2.754338)
-		(end 0.25 -2.754338)
+		(start 10.845 -2.826506)
+		(end 11.345 -2.826506)
 		(stroke
 			(width 0.12)
 			(type solid)
@@ -83,8 +82,8 @@
 		(uuid "d9b2e5ea-0fb0-4c42-bd91-ac5417732b62")
 	)
 	(fp_line
-		(start 0 -2.321325)
-		(end -0.25 -2.754338)
+		(start 11.095 -2.393493)
+		(end 10.845 -2.826506)
 		(stroke
 			(width 0.12)
 			(type solid)
@@ -93,8 +92,8 @@
 		(uuid "cd690b79-812f-4a60-805e-0f99b006a9d6")
 	)
 	(fp_line
-		(start 0.25 -2.754338)
-		(end 0 -2.321325)
+		(start 11.345 -2.826506)
+		(end 11.095 -2.393493)
 		(stroke
 			(width 0.12)
 			(type solid)
@@ -270,20 +269,21 @@
 		(uuid "a2c59bcf-4dcd-47b0-86fb-04486bf6bdf7")
 	)
 	(pad "1" thru_hole rect
-		(at 0 0)
+		(at 11.08 0)
 		(size 1.6 1.6)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "81839ecb-b60d-42e1-9a1b-2ce46fb7f320")
+		(thermal_bridge_angle 45)
+		(uuid "40f871d2-393d-434f-9e9b-166db8240999")
 	)
 	(pad "2" thru_hole circle
-		(at 2.77 0)
+		(at 8.31 0)
 		(size 1.6 1.6)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "25c58002-7990-4cd6-a921-7108f2977b15")
+		(uuid "2f8351ff-50b6-44b8-81fa-d468c6978a8d")
 	)
 	(pad "3" thru_hole circle
 		(at 5.54 0)
@@ -294,38 +294,31 @@
 		(uuid "cd885e8d-dd44-4604-90ff-0bffb1dc3798")
 	)
 	(pad "4" thru_hole circle
-		(at 8.31 0)
+		(at 2.77 0)
 		(size 1.6 1.6)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "2f8351ff-50b6-44b8-81fa-d468c6978a8d")
+		(uuid "25c58002-7990-4cd6-a921-7108f2977b15")
 	)
 	(pad "5" thru_hole circle
-		(at 11.08 0)
+		(at 0 0)
 		(size 1.6 1.6)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "40f871d2-393d-434f-9e9b-166db8240999")
+		(thermal_bridge_angle 90)
+		(uuid "81839ecb-b60d-42e1-9a1b-2ce46fb7f320")
 	)
 	(pad "6" thru_hole circle
-		(at 1.385 2.84)
+		(at 9.695 2.84)
 		(size 1.6 1.6)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "e446cd82-d095-4f21-81d1-369aab82b454")
+		(uuid "c6ae8bc4-4a5e-4065-9084-10d45c33902a")
 	)
 	(pad "7" thru_hole circle
-		(at 4.155 2.84)
-		(size 1.6 1.6)
-		(drill 1)
-		(layers "*.Cu" "*.Mask")
-		(remove_unused_layers no)
-		(uuid "4b766697-f6f3-4bcb-9fa8-f9ca2de7f9d3")
-	)
-	(pad "8" thru_hole circle
 		(at 6.925 2.84)
 		(size 1.6 1.6)
 		(drill 1)
@@ -333,13 +326,21 @@
 		(remove_unused_layers no)
 		(uuid "c73b6b4e-d9fe-4092-a80d-55884b0177a6")
 	)
-	(pad "9" thru_hole circle
-		(at 9.695 2.84)
+	(pad "8" thru_hole circle
+		(at 4.155 2.84)
 		(size 1.6 1.6)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
-		(uuid "c6ae8bc4-4a5e-4065-9084-10d45c33902a")
+		(uuid "4b766697-f6f3-4bcb-9fa8-f9ca2de7f9d3")
+	)
+	(pad "9" thru_hole circle
+		(at 1.385 2.84)
+		(size 1.6 1.6)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "e446cd82-d095-4f21-81d1-369aab82b454")
 	)
 	(embedded_fonts no)
 	(model "${KICAD9_3DMODEL_DIR}/Connector_Dsub.3dshapes/DSUB-9_Pins_Horizontal_P2.77x2.84mm_EdgePinOffset7.70mm_Housed_MountingHolesOffset9.12mm.step"

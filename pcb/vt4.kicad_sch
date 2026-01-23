@@ -8362,7 +8362,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "0-footprints:DSUB-9_Pins_Horizontal"
+		(property "Footprint" "0-footprints:DSUB_9_Pins_Female_Horizontal"
 			(at 262.89 114.3 0)
 			(effects
 				(font
@@ -8533,7 +8533,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
+		(property "Footprint" "0-footprints:SOIC-16_3.9x9.9mm_P1.27mm_Handsolder"
 			(at 205.74 158.75 0)
 			(effects
 				(font
@@ -8782,7 +8782,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
+		(property "Footprint" "0-footprints:SOIC-16_3.9x9.9mm_P1.27mm_Handsolder"
 			(at 205.74 78.74 0)
 			(effects
 				(font
@@ -9443,7 +9443,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "0-footprints:DSUB-9_Pins_Horizontal"
+		(property "Footprint" "0-footprints:DSUB_9_Pins_Female_Horizontal"
 			(at 262.89 34.29 0)
 			(effects
 				(font
@@ -10543,7 +10543,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm"
+		(property "Footprint" "0-footprints:SOIC-8_5.3x5.3mm_P1.27mm_Handsolder"
 			(at 102.87 29.21 0)
 			(effects
 				(font
@@ -10968,7 +10968,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "0-footprints:DSUB-9_Pins_Horizontal"
+		(property "Footprint" "0-footprints:DSUB_9_Pins_Female_Horizontal"
 			(at 262.89 149.86 0)
 			(effects
 				(font
@@ -11126,7 +11126,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4125-xx-x-0190_6P_TopMnt_Horizontal"
+		(property "Footprint" "0-footprints:USB_C_Receptacle_GCT_USB4125-xx-x-0190_6P_TopMnt_Horizontal_Handsolder"
 			(at 40.64 152.4 0)
 			(effects
 				(font
@@ -11887,7 +11887,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "0-footprints:DSUB-9_Pins_Horizontal"
+		(property "Footprint" "0-footprints:DSUB_9_Pins_Female_Horizontal"
 			(at 262.89 69.85 0)
 			(effects
 				(font
