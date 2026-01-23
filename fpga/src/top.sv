@@ -7,8 +7,8 @@ module top
     inout wire          ps2_clk,
     inout wire          ps2_data,
 
-    input wire          uart_rx,
-    output wire         uart_tx,
+    input wire          uart4_rx,
+    output wire         uart4_tx,
 
     input wire [1:0]    button,
     output wire [5:0]   led,
@@ -98,12 +98,12 @@ module top
         .clk(clk),
         .reset_low(reset_low),
 
-        .rx_pin(uart_rx),
+        .rx_pin(uart4_rx),
         .rx_ready(screen_code_ready),
         .rx_valid(screen_code_valid),
         .rx_byte(screen_code_byte),
 
-        .tx_pin(uart_tx),
+        .tx_pin(uart4_tx),
         .tx_ready(key_code_ready),
         .tx_valid(key_code_valid),
         .tx_byte(key_code_byte)
