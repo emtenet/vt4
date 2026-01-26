@@ -39,36 +39,36 @@ IO_PORT "button[0]" IO_TYPE=LVCMOS18;
 IO_LOC "button[1]" 4;
 IO_PORT "button[1]" IO_TYPE=LVCMOS18;
 //
-IO_LOC "ps2_clk" 32;
+IO_LOC "ps2_clk" 57;
 IO_PORT "ps2_clk" IO_TYPE=LVCMOS33 PULL_MODE=NONE OPEN_DRAIN=ON;
-IO_LOC "ps2_data" 31;
+IO_LOC "ps2_data" 56;
 IO_PORT "ps2_data" IO_TYPE=LVCMOS33 PULL_MODE=NONE OPEN_DRAIN=ON;
 //
-IO_LOC "uart1_tx" 56;
+IO_LOC "uart1_tx" 53;
 IO_PORT "uart1_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart1_rx" 57;
+IO_LOC "uart1_rx" 51;
 IO_PORT "uart1_rx" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart2_tx" 55;
+IO_LOC "uart2_tx" 54;
 IO_PORT "uart2_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart2_rx" 54;
+IO_LOC "uart2_rx" 55;
 IO_PORT "uart2_rx" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart3_tx" 25;
+IO_LOC "uart3_tx" 31;
 IO_PORT "uart3_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart3_rx" 26;
+IO_LOC "uart3_rx" 32;
 IO_PORT "uart3_rx" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart4_tx" 39;
+IO_LOC "uart4_tx" 49;
 IO_PORT "uart4_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart4_rx" 36;
+IO_LOC "uart4_rx" 48;
 IO_PORT "uart4_rx" IO_TYPE=LVCMOS33;
 //
-IO_LOC "feram_cs" 86;
-IO_PORT "feram_cs" IO_TYPE=LVCMOS18;
-IO_LOC "feram_sclk" 84;
-IO_PORT "feram_sclk" IO_TYPE=LVCMOS18;
-IO_LOC "feram_si" 83;
-IO_PORT "feram_si" IO_TYPE=LVCMOS18;
-IO_LOC "feram_so" 85;
-IO_PORT "feram_so" IO_TYPE=LVCMOS18;
+IO_LOC "feram_cs" 37;
+IO_PORT "feram_cs" IO_TYPE=LVCMOS33;
+IO_LOC "feram_sclk" 36;
+IO_PORT "feram_sclk" IO_TYPE=LVCMOS33;
+IO_LOC "feram_si" 39;
+IO_PORT "feram_si" IO_TYPE=LVCMOS33;
+IO_LOC "feram_so" 38;
+IO_PORT "feram_so" IO_TYPE=LVCMOS33;
