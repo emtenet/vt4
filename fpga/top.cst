@@ -54,14 +54,14 @@ IO_PORT "uart2_tx" IO_TYPE=LVCMOS33;
 IO_LOC "uart2_rx" 55;
 IO_PORT "uart2_rx" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart3_tx" 31;
+IO_LOC "uart3_tx" 49;
 IO_PORT "uart3_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart3_rx" 32;
+IO_LOC "uart3_rx" 48;
 IO_PORT "uart3_rx" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart4_tx" 49;
+IO_LOC "uart4_tx" 31;
 IO_PORT "uart4_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart4_rx" 48;
+IO_LOC "uart4_rx" 32;
 IO_PORT "uart4_rx" IO_TYPE=LVCMOS33;
 //
 IO_LOC "feram_cs" 37;
