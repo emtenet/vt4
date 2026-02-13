@@ -17,6 +17,7 @@ module hdmi_text_mode
     output reg          out_v_sync,
     output reg [4:0]    out_row,
     output reg [4:0]    out_row_pixel,
+    output reg          out_border,
     output reg [6:0]    out_col,
     output reg          out_col_start,
     output reg [3:0]    out_col_pixel
@@ -28,6 +29,7 @@ module hdmi_text_mode
         out_v_sync = NO;
         out_row = 0;
         out_row_pixel = 0;
+        out_border = NO;
         out_col = 0;
         out_col_start = NO;
         out_col_pixel = 0;
@@ -40,10 +42,16 @@ module hdmi_text_mode
 
         if (in_active) begin
             if (in_h_start) begin
+                out_border <= NO;
                 out_col <= 0;
                 out_col_pixel <= 0;
                 out_col_start <= YES;
             end else if (out_col_pixel == 4'd9) begin
+                if (out_col == 99) begin
+                    out_border <= YES;
+                end else begin
+                    out_border <= NO;
+                end
                 out_col <= out_col + 1;
                 out_col_pixel <= 0;
                 out_col_start <= YES;
@@ -64,6 +72,7 @@ module hdmi_text_mode
                 end
             end
         end else begin
+            out_border <= NO;
             out_col <= 0;
             out_col_pixel <= 0;
             out_col_start <= NO;

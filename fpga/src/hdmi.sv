@@ -48,6 +48,7 @@ module hdmi
     wire        stage1_v_sync;
     wire [4:0]  stage1_row;
     wire [4:0]  stage1_row_pixel;
+    wire        stage1_border;
     wire [6:0]  stage1_col;
     wire        stage1_col_start;
     wire [3:0]  stage1_col_pixel;
@@ -69,6 +70,7 @@ module hdmi
         .out_v_sync(stage1_v_sync),
         .out_row(stage1_row),
         .out_row_pixel(stage1_row_pixel),
+        .out_border(stage1_border),
         .out_col(stage1_col),
         .out_col_start(stage1_col_start),
         .out_col_pixel(stage1_col_pixel)
@@ -80,6 +82,7 @@ module hdmi
     reg         stage2_h_sync;
     reg         stage2_v_sync;
     reg [4:0]   stage2_row_pixel;
+    reg         stage2_border;
     reg         stage2_col_start;
     wire [7:0]  stage2_byte;
     reg         stage2_invert;
@@ -96,6 +99,7 @@ module hdmi
         stage2_h_sync <= stage1_h_sync;
         stage2_v_sync <= stage1_v_sync;
         stage2_row_pixel <= stage1_row_pixel;
+        stage2_border <= stage1_border;
         stage2_col_start <= stage1_col_start;
         stage2_invert = NO;
         if (stage1_row == cursor_row && stage1_col == cursor_col) begin
@@ -108,6 +112,7 @@ module hdmi
     reg         stage3_h_sync;
     reg         stage3_v_sync;
     reg         stage3_active;
+    reg         stage3_border;
     reg         stage3_col_start;
     reg         stage3_invert;
     wire [9:0]  stage3_pixels;
@@ -116,6 +121,7 @@ module hdmi
         stage3_active <= stage2_active;
         stage3_h_sync <= stage2_h_sync;
         stage3_v_sync <= stage2_v_sync;
+        stage3_border <= stage2_border;
         stage3_col_start <= stage2_col_start;
         stage3_invert <= stage2_invert;
     end
@@ -134,13 +140,16 @@ module hdmi
     reg         stage4_h_sync;
     reg         stage4_v_sync;
     reg         stage4_active;
+    reg         stage4_border;
     reg [9:0]   stage4_pixels;
     wire        stage4_pixel;
+    wire [23:0] stage4_rgb;
 
     always_ff @(posedge clk) begin
         stage4_active <= stage3_active;
         stage4_h_sync <= stage3_h_sync;
         stage4_v_sync <= stage3_v_sync;
+        stage4_border <= stage3_border;
 
         // shift through char pixels
         if (stage3_col_start) begin
@@ -156,6 +165,11 @@ module hdmi
 
     always_comb begin
         stage4_pixel = stage4_pixels[9];
+        if (stage4_border == YES) begin
+            stage4_rgb = 24'b11000000_00000000_00000000;
+        end else begin
+            stage4_rgb = {3{stage4_pixel,7'b0}};
+        end
     end
 
     hdmi_encode hdmi_encode (
@@ -166,7 +180,7 @@ module hdmi
         .active(stage4_active),
         .h_sync(stage4_h_sync),
         .v_sync(stage4_v_sync),
-        .rgb({3{stage4_pixel,7'b0}}),
+        .rgb(stage4_rgb),
 
         .hdmi_clk_n(hdmi_clk_n),
         .hdmi_clk_p(hdmi_clk_p),
