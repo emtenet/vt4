@@ -1,6 +1,14 @@
  TODO
 ======
 
+ testing v2 PCB
+----------------
+
+UART 1 - display OK, NO keyboard
+UART 2 - NO display, ? keyboard
+UART 3 - display OK, keyboard OK
+UART 4 - display OK, keyboard OK
+
  PCB
 -----
 
