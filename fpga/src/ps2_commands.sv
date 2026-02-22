@@ -1,3 +1,8 @@
+//  # PS/2 commands
+
+//  Translate high level PS/2 commands to
+//  individual data bytes and their acknowledgement.
+
 `default_nettype none
 `timescale 1ns / 1ps
 module ps2_commands
@@ -5,22 +10,22 @@ module ps2_commands
     input   wire        clk,
     input   wire        reset_low,
 
-    input   wire        command_ready,
-    output  logic       command_valid,
-    output  reg [7:0]   command_byte,
+    input   wire        ack_scan_code_received,
 
-    output  logic       command_ack_ready,
-    input   wire        command_ack_valid,
-    input   wire        command_ack_error,
-
-    input   wire        acknowledge,
-
-    input   wire        resend,
+    input   wire        resend_scan_code_received,
 
     input   wire        set_status,
     input   wire        set_status_caps_lock,
     input   wire        set_status_num_lock,
-    input   wire        set_status_scroll_lock
+    input   wire        set_status_scroll_lock,
+
+    input   wire        command_ready,
+    output  logic       command_valid,
+    output  reg [7:0]   command_byte,
+
+    output  logic       command_received_ready,
+    input   wire        command_received_valid,
+    input   wire        command_received_error,
 );
 
     //==========================================
@@ -35,7 +40,7 @@ module ps2_commands
         .clk(clk),
         .reset_low(reset_low),
 
-        .made(resend),
+        .made(resend_scan_code_received),
         .request(resend_request),
         .taken(resend_taken)
     );
@@ -66,7 +71,7 @@ module ps2_commands
     logic       command_set_status;
     logic       command_set_status_leds;
     // internal acknowledge
-    logic       command_acknowledge;
+    logic       command_acknowledged;
 
     localparam  STATE_IDLE                  = 2'd0;
     localparam  STATE_RESEND                = 2'd1;
@@ -117,17 +122,17 @@ module ps2_commands
                 end
             end
             STATE_RESEND: begin
-                if (command_acknowledge) begin
+                if (command_acknowledged) begin
                     state <= STATE_IDLE;
                 end
             end
             STATE_SET_STATUS: begin
-                if (command_acknowledge) begin
+                if (command_acknowledged) begin
                     state <= STATE_SET_STATUS_LEDS;
                 end
             end
             STATE_SET_STATUS_LEDS: begin
-                if (command_acknowledge) begin
+                if (command_acknowledged) begin
                     state <= STATE_IDLE;
                 end
             end
@@ -146,7 +151,7 @@ module ps2_commands
 
     localparam  COMMAND_STATE_IDLE          = 2'd0;
     localparam  COMMAND_STATE_SEND          = 2'd1;
-    localparam  COMMAND_STATE_ACK           = 2'd2;
+    localparam  COMMAND_STATE_RECEIVED      = 2'd2;
     localparam  COMMAND_STATE_ACKNOWLEDGE   = 2'd3;
 
     reg [1:0]   command_state;
@@ -159,8 +164,8 @@ module ps2_commands
 
     always_comb begin
         command_valid = NO;
-        command_ack_ready = NO;
-        command_acknowledge = NO;
+        command_received_ready = NO;
+        command_acknowledged = NO;
 
         case (command_state)
             COMMAND_STATE_IDLE: begin
@@ -168,11 +173,11 @@ module ps2_commands
             COMMAND_STATE_SEND: begin
                 command_valid = YES;
             end
-            COMMAND_STATE_ACK: begin
-                command_ack_ready = YES;
+            COMMAND_STATE_RECEIVED: begin
+                command_received_ready = YES;
             end
             COMMAND_STATE_ACKNOWLEDGE: begin
-                command_acknowledge = acknowledge;
+                command_acknowledged = ack_scan_code_received;
             end
         endcase
     end
@@ -196,16 +201,16 @@ module ps2_commands
             end
             COMMAND_STATE_SEND: begin
                 if (command_ready == YES) begin
-                    command_state <= COMMAND_STATE_ACK;
+                    command_state <= COMMAND_STATE_RECEIVED;
                 end
             end
-            COMMAND_STATE_ACK: begin
-                if (command_ack_valid == YES) begin
+            COMMAND_STATE_RECEIVED: begin
+                if (command_received_valid == YES) begin
                     command_state <= COMMAND_STATE_ACKNOWLEDGE;
                 end
             end
             COMMAND_STATE_ACKNOWLEDGE: begin
-                if (acknowledge) begin
+                if (ack_scan_code_received) begin
                     command_state <= COMMAND_STATE_IDLE;
                 end
             end

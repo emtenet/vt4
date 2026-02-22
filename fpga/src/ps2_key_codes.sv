@@ -1,3 +1,17 @@
+//  # PS/2 key codes
+
+//  Convert a PS/2 scan code into a stream of key codes.
+
+//  Uses keyboard state (caps-lock, control, num-lock & shift)
+//  to send the correct key
+//  lowercase / uppercase / control / number / arrow etc...
+
+//  One scan code can be converted to a stream of key codes.
+//  For example, the up arrow (scan code) gets converted to
+//  the following key codes:
+//
+//      ESC '[' 'A'
+
 `default_nettype none
 `timescale 1ns / 1ps
 module ps2_key_codes
@@ -11,9 +25,9 @@ module ps2_key_codes
     input   wire        scan_code_extended,
     input   wire        scan_code_special,
 
-    input   wire        num_lock,
-    input   wire        control,
     input   wire        caps_lock,
+    input   wire        control,
+    input   wire        num_lock,
     input   wire        shift,
 
     input   wire        character_ready,

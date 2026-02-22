@@ -1,3 +1,16 @@
+//  # PS/2 protocol
+
+//  Runs the PS/2 bit wire level protocol
+//  framing each byte in frames
+//
+//      {start, bits[8], parity, stop}
+
+//  When receiving a command, the keyboard acknowledges
+//  the receipt.
+//  NOTE: this is different from the command sending
+//  and ACK scan code to say it completed processing
+//  the command.
+
 `default_nettype none
 `timescale 1ns / 1ps
 module ps2_protocol
@@ -12,14 +25,17 @@ module ps2_protocol
     output  logic       ps2_data_out,
     output  logic       ps2_data_oe,
 
+    // send command byte to keyboard
     output  logic       command_ready,
     input   wire        command_valid,
     input   wire [7:0]  command_byte,
 
-    input   wire        command_ack_ready,
-    output  reg         command_ack_valid,
-    output  reg         command_ack_error,
+    // command byte received from keyboard
+    input   wire        command_received_ready,
+    output  reg         command_received_valid,
+    output  reg         command_received_error,
 
+    // scan code from keyboard
     input   wire        scan_code_ready,
     output  reg         scan_code_valid,
     output  logic [7:0] scan_code_byte,
@@ -310,8 +326,8 @@ module ps2_protocol
 
         command = 10'b0;
         command_success = NO;
-        command_ack_valid = NO;
-        command_ack_error = NO;
+        command_received_valid = NO;
+        command_received_error = NO;
     end
 
     always_ff @(posedge clk) begin
@@ -322,9 +338,9 @@ module ps2_protocol
             scan_code <= 8'b0;
         end
 
-        if (command_ack_valid == YES && command_ack_ready == YES) begin
-            command_ack_valid <= NO;
-            command_ack_error <= NO;
+        if (command_received_valid == YES && command_received_ready == YES) begin
+            command_received_valid <= NO;
+            command_received_error <= NO;
         end
 
         // RX transitions
@@ -359,8 +375,8 @@ module ps2_protocol
         if (did_tx_start == YES) begin
             state <= STATE_TX_REQUEST;
             command <= {command_parity, command_byte, START_BIT};
-            command_ack_valid <= NO;
-            command_ack_error <= NO;
+            command_received_valid <= NO;
+            command_received_error <= NO;
         end
 
         if (did_tx_bit == YES) begin
@@ -373,8 +389,8 @@ module ps2_protocol
 
         if (did_tx_end) begin
             state <= STATE_IDLE;
-            command_ack_valid <= YES;
-            command_ack_error <= ~command_success;
+            command_received_valid <= YES;
+            command_received_error <= ~command_success;
         end
 
         // General transitions
@@ -386,8 +402,8 @@ module ps2_protocol
         if (watchdog_enabled == YES && watchdog_finished == YES) begin
             state <= STATE_IDLE;
             if (state_is_tx == YES) begin
-                command_ack_valid <= YES;
-                command_ack_error <= YES;
+                command_received_valid <= YES;
+                command_received_error <= YES;
             end else begin
                 scan_code_error <= YES;
             end
@@ -406,8 +422,8 @@ module ps2_protocol
 
             command <= 10'b0;
             command_success <= NO;
-            command_ack_valid <= NO;
-            command_ack_error <= NO;
+            command_received_valid <= NO;
+            command_received_error <= NO;
         end
     end
 

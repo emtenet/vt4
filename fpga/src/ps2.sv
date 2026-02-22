@@ -8,6 +8,10 @@ module ps2
     inout   wire        ps2_clk,
     inout   wire        ps2_data,
 
+    input   wire        switch_port_ready,
+    output  wire        switch_port_valid,
+    output  wire [7:0]  switch_port_data,
+
     input   wire        character_ready,
     output  wire        character_valid,
     output  wire [7:0]  character_byte,
@@ -49,9 +53,9 @@ module ps2
     wire        command_valid;
     wire [7:0]  command_byte;
 
-    wire        command_ack_ready;
-    wire        command_ack_valid;
-    wire        command_ack_error;
+    wire        command_received_ready;
+    wire        command_received_valid;
+    wire        command_received_error;
 
     wire        scan_code_ready;
     wire        scan_code_valid;
@@ -74,9 +78,9 @@ module ps2
         .command_valid(command_valid),
         .command_byte(command_byte),
 
-        .command_ack_ready(command_ack_ready),
-        .command_ack_valid(command_ack_valid),
-        .command_ack_error(command_ack_error),
+        .command_received_ready(command_received_ready),
+        .command_received_valid(command_received_valid),
+        .command_received_error(command_received_error),
 
         .scan_code_ready(scan_code_ready),
         .scan_code_valid(scan_code_valid),
@@ -92,9 +96,9 @@ module ps2
     wire        caps_lock;
     wire        shift;
 
-    wire        acknowledge;
+    wire        ack_scan_code_received;
 
-    wire        resend;
+    wire        resend_scan_code_received;
 
     wire        set_status;
     wire        set_status_caps_lock;
@@ -117,9 +121,9 @@ module ps2
         .caps_lock(caps_lock),
         .shift(shift),
 
-        .acknowledge(acknowledge),
+        .ack_scan_code_received(ack_scan_code_received),
 
-        .resend(resend),
+        .resend_scan_code_received(resend_scan_code_received),
 
         .set_status(set_status),
         .set_status_caps_lock(set_status_caps_lock),
@@ -132,22 +136,22 @@ module ps2
         .clk(clk),
         .reset_low(reset_low),
 
-        .command_ready(command_ready),
-        .command_valid(command_valid),
-        .command_byte(command_byte),
+        .ack_scan_code_received(ack_scan_code_received),
 
-        .command_ack_ready(command_ack_ready),
-        .command_ack_valid(command_ack_valid),
-        .command_ack_error(command_ack_error),
-
-        .acknowledge(acknowledge),
-
-        .resend(resend),
+        .resend_scan_code_received(resend_scan_code_received),
 
         .set_status(set_status),
         .set_status_caps_lock(set_status_caps_lock),
         .set_status_num_lock(set_status_num_lock),
-        .set_status_scroll_lock(set_status_scroll_lock)
+        .set_status_scroll_lock(set_status_scroll_lock),
+
+        .command_ready(command_ready),
+        .command_valid(command_valid),
+        .command_byte(command_byte),
+
+        .command_received_ready(command_received_ready),
+        .command_received_valid(command_received_valid),
+        .command_received_error(command_received_error),
     );
 
     ps2_key_codes key_codes

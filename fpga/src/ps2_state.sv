@@ -1,3 +1,20 @@
+//  # PS/2 state machine
+
+//  Keep track of keyboard state:
+
+//   * caps-lock
+//   * control
+//   * num-lock
+//   * shift
+
+//  Decode special scan codes:
+
+//   * scan code is ACK
+//   * scan code is EXTENDED
+//   * scan code is RESEND
+//   * scan code is SPECIAL
+//   * scan code is STATUS (xxx-lock)
+
 `default_nettype none
 `timescale 1ns / 1ps
 module ps2_state
@@ -5,20 +22,22 @@ module ps2_state
     input   wire        clk,
     input   wire        reset_low,
 
+    // do not participate in ready/valid handshake
+    // just observe
     input   wire        scan_code_ready,
     input   wire        scan_code_valid,
     input   wire [7:0]  scan_code_byte,
     output  logic       scan_code_extended,
     output  logic       scan_code_special,
 
-    output  reg         num_lock,
-    output  logic       control,
     output  reg         caps_lock,
+    output  logic       control,
+    output  reg         num_lock,
     output  logic       shift,
 
-    output  logic       acknowledge,
+    output  logic       ack_scan_code_received,
 
-    output  logic       resend,
+    output  logic       resend_scan_code_received,
 
     output  logic       set_status,
     output  logic       set_status_caps_lock,
@@ -30,8 +49,7 @@ module ps2_state
     localparam  NORMAL = NO;
     localparam  NORMAL_OR_EXTENDED = 1'bx;
 
-    localparam  SCAN_CODE_SELF_TEST     = 8'hAA;
-    localparam  SCAN_CODE_ACKNOWLEDGE   = 8'hFA;
+    localparam  SCAN_CODE_ACK           = 8'hFA;
     localparam  SCAN_CODE_CAPS_LOCK     = 8'h58;
     localparam  SCAN_CODE_CONTROL       = 8'h14;
     localparam  SCAN_CODE_EXTENDED      = 8'hE0;
@@ -40,6 +58,7 @@ module ps2_state
     localparam  SCAN_CODE_RELEASED      = 8'hF0;
     localparam  SCAN_CODE_RESEND        = 8'hFE;
     localparam  SCAN_CODE_RIGHT_SHIFT   = 8'h59;
+    localparam  SCAN_CODE_SELF_TEST     = 8'hAA;
     localparam  SCAN_CODE_SCROLL_LOCK   = 8'h7E;
 
     //==========================================
@@ -83,8 +102,8 @@ module ps2_state
         scan_code_extended = extended;
         scan_code_special = NO;
 
-        acknowledge = NO;
-        resend = NO;
+        ack_scan_code_received = NO;
+        resend_scan_code_received = NO;
         set_status = NO;
         set_status_caps_lock = caps_lock;
         set_status_num_lock = num_lock;
@@ -107,9 +126,9 @@ module ps2_state
 
         if (scan_code_valid == YES && scan_code_ready == YES) begin
             case ({scan_code_byte, extended})
-                {SCAN_CODE_ACKNOWLEDGE, NORMAL}: begin
+                {SCAN_CODE_ACK, NORMAL}: begin
                     scan_code_special = YES;
-                    acknowledge = YES;
+                    ack_scan_code_received = YES;
                 end
                 {SCAN_CODE_CAPS_LOCK, NORMAL}: begin
                     scan_code_special = YES;
@@ -128,6 +147,10 @@ module ps2_state
                     set_right_control = YES;
                     set_status = YES;
                 end
+                {SCAN_CODE_EXTENDED, NORMAL}: begin
+                    scan_code_special = YES;
+                    set_extended = YES;
+                end
                 {SCAN_CODE_LEFT_SHIFT, NORMAL}: begin
                     scan_code_special = YES;
                     set_left_shift = YES;
@@ -140,6 +163,14 @@ module ps2_state
                         set_status = YES;
                     end
                 end
+                {SCAN_CODE_RELEASED, NORMAL_OR_EXTENDED}: begin
+                    scan_code_special = YES;
+                    set_released = YES;
+                end
+                {SCAN_CODE_RESEND, NORMAL}: begin
+                    scan_code_special = YES;
+                    resend_scan_code_received = YES;
+                end
                 {SCAN_CODE_RIGHT_SHIFT, NORMAL}: begin
                     scan_code_special = YES;
                     set_right_shift = YES;
@@ -151,18 +182,6 @@ module ps2_state
                         toggle_scroll_lock = YES;
                         set_status = YES;
                     end
-                end
-                {SCAN_CODE_EXTENDED, NORMAL}: begin
-                    scan_code_special = YES;
-                    set_extended = YES;
-                end
-                {SCAN_CODE_RELEASED, NORMAL_OR_EXTENDED}: begin
-                    scan_code_special = YES;
-                    set_released = YES;
-                end
-                {SCAN_CODE_RESEND, NORMAL}: begin
-                    scan_code_special = YES;
-                    resend = YES;
                 end
                 {SCAN_CODE_SELF_TEST, NORMAL}: begin
                     scan_code_special = YES;
