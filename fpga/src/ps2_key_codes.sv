@@ -22,13 +22,13 @@ module ps2_key_codes
     output  logic       scan_code_ready,
     input   wire        scan_code_valid,
     input   wire [7:0]  scan_code_byte,
-    input   wire        scan_code_extended,
-    input   wire        scan_code_special,
+    input   wire        scan_code_is_extended,
+    input   wire        scan_code_is_special,
 
-    input   wire        caps_lock,
-    input   wire        control,
-    input   wire        num_lock,
-    input   wire        shift,
+    input   wire        num_lock_is_on,
+    input   wire        control_is_down,
+    input   wire        caps_lock_is_on,
+    input   wire        shift_is_down,
 
     input   wire        character_ready,
     output  logic       character_valid,
@@ -89,7 +89,7 @@ module ps2_key_codes
         case (state)
             STATE_IDLE: begin
                 scan_code_ready = YES;
-                if (scan_code_valid && !scan_code_special) begin
+                if (scan_code_valid && !scan_code_is_special) begin
                     scan_code_lookup = YES;
                     state_increment = YES;
                 end
@@ -190,12 +190,12 @@ module ps2_key_codes
 
         .ce(scan_code_lookup),
 
-        .extended(scan_code_extended),
+        .extended(scan_code_is_extended),
         .scan_code(scan_code_byte),
-        .num_lock(num_lock),
-        .control(control),
-        .caps_lock(caps_lock),
-        .shift(shift),
+        .caps_lock(caps_lock_is_on),
+        .control(control_is_down),
+        .num_lock(num_lock_is_on),
+        .shift(shift_is_down),
 
         .q(key_code_q)
     );

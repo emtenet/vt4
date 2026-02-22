@@ -8,10 +8,6 @@ module ps2
     inout   wire        ps2_clk,
     inout   wire        ps2_data,
 
-    input   wire        switch_port_ready,
-    output  wire        switch_port_valid,
-    output  wire [7:0]  switch_port_data,
-
     input   wire        character_ready,
     output  wire        character_valid,
     output  wire [7:0]  character_byte,
@@ -49,13 +45,13 @@ module ps2
         .oe(ps2_data_oe)
     );
 
-    wire        command_ready;
-    wire        command_valid;
-    wire [7:0]  command_byte;
+    wire        command_code_ready;
+    wire        command_code_valid;
+    wire [7:0]  command_code_byte;
 
-    wire        command_received_ready;
-    wire        command_received_valid;
-    wire        command_received_error;
+    wire        command_code_ack_ready;
+    wire        command_code_ack_valid;
+    wire        command_code_ack_error;
 
     wire        scan_code_ready;
     wire        scan_code_valid;
@@ -74,13 +70,13 @@ module ps2
         .ps2_data_out(ps2_data_out),
         .ps2_data_oe(ps2_data_oe),
 
-        .command_ready(command_ready),
-        .command_valid(command_valid),
-        .command_byte(command_byte),
+        .command_code_ready(command_code_ready),
+        .command_code_valid(command_code_valid),
+        .command_code_byte(command_code_byte),
 
-        .command_received_ready(command_received_ready),
-        .command_received_valid(command_received_valid),
-        .command_received_error(command_received_error),
+        .command_code_ack_ready(command_code_ack_ready),
+        .command_code_ack_valid(command_code_ack_valid),
+        .command_code_ack_error(command_code_ack_error),
 
         .scan_code_ready(scan_code_ready),
         .scan_code_valid(scan_code_valid),
@@ -88,22 +84,17 @@ module ps2
         .scan_code_error(scan_code_error)
     );
 
-    wire        scan_code_extended;
-    wire        scan_code_special;
+    wire        num_lock_is_on;
+    wire        control_is_down;
+    wire        caps_lock_is_on;
+    wire        scroll_lock_is_on;
+    wire        shift_is_down;
 
-    wire        num_lock;
-    wire        control;
-    wire        caps_lock;
-    wire        shift;
-
-    wire        ack_scan_code_received;
-
-    wire        resend_scan_code_received;
-
-    wire        set_status;
-    wire        set_status_caps_lock;
-    wire        set_status_num_lock;
-    wire        set_status_scroll_lock;
+    wire        scan_code_is_ack;
+    wire        scan_code_is_extended;
+    wire        scan_code_is_resend;
+    wire        scan_code_is_special;
+    wire        scan_code_is_status;
 
     ps2_state state
     (
@@ -113,22 +104,18 @@ module ps2
         .scan_code_ready(scan_code_ready),
         .scan_code_valid(scan_code_valid),
         .scan_code_byte(scan_code_byte),
-        .scan_code_extended(scan_code_extended),
-        .scan_code_special(scan_code_special),
 
-        .num_lock(num_lock),
-        .control(control),
-        .caps_lock(caps_lock),
-        .shift(shift),
+        .num_lock_is_on(num_lock_is_on),
+        .control_is_down(control_is_down),
+        .caps_lock_is_on(caps_lock_is_on),
+        .scroll_lock_is_on(scroll_lock_is_on),
+        .shift_is_down(shift_is_down),
 
-        .ack_scan_code_received(ack_scan_code_received),
-
-        .resend_scan_code_received(resend_scan_code_received),
-
-        .set_status(set_status),
-        .set_status_caps_lock(set_status_caps_lock),
-        .set_status_num_lock(set_status_num_lock),
-        .set_status_scroll_lock(set_status_scroll_lock)
+        .scan_code_is_ack(scan_code_is_ack),
+        .scan_code_is_extended(scan_code_is_extended),
+        .scan_code_is_resend(scan_code_is_resend),
+        .scan_code_is_special(scan_code_is_special),
+        .scan_code_is_status(scan_code_is_status),
     );
 
     ps2_commands ps2_commands
@@ -136,22 +123,21 @@ module ps2
         .clk(clk),
         .reset_low(reset_low),
 
-        .ack_scan_code_received(ack_scan_code_received),
+        .scan_code_is_ack(scan_code_is_ack),
+        .scan_code_is_resend(scan_code_is_resend),
+        .scan_code_is_status(scan_code_is_status),
 
-        .resend_scan_code_received(resend_scan_code_received),
+        .caps_lock_is_on(caps_lock_is_on),
+        .num_lock_is_on(num_lock_is_on),
+        .scroll_lock_is_on(scroll_lock_is_on),
 
-        .set_status(set_status),
-        .set_status_caps_lock(set_status_caps_lock),
-        .set_status_num_lock(set_status_num_lock),
-        .set_status_scroll_lock(set_status_scroll_lock),
+        .command_code_ready(command_code_ready),
+        .command_code_valid(command_code_valid),
+        .command_code_byte(command_code_byte),
 
-        .command_ready(command_ready),
-        .command_valid(command_valid),
-        .command_byte(command_byte),
-
-        .command_received_ready(command_received_ready),
-        .command_received_valid(command_received_valid),
-        .command_received_error(command_received_error),
+        .command_code_ack_ready(command_code_ack_ready),
+        .command_code_ack_valid(command_code_ack_valid),
+        .command_code_ack_error(command_code_ack_error),
     );
 
     ps2_key_codes key_codes
@@ -162,13 +148,13 @@ module ps2
         .scan_code_ready(scan_code_ready),
         .scan_code_valid(scan_code_valid),
         .scan_code_byte(scan_code_byte),
-        .scan_code_extended(scan_code_extended),
-        .scan_code_special(scan_code_special),
+        .scan_code_is_extended(scan_code_is_extended),
+        .scan_code_is_special(scan_code_is_special),
 
-        .num_lock(num_lock),
-        .control(control),
-        .caps_lock(caps_lock),
-        .shift(shift),
+        .num_lock_is_on(num_lock_is_on),
+        .control_is_down(control_is_down),
+        .caps_lock_is_on(caps_lock_is_on),
+        .shift_is_down(shift_is_down),
 
         .character_ready(character_ready),
         .character_valid(character_valid),

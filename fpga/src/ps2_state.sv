@@ -27,22 +27,18 @@ module ps2_state
     input   wire        scan_code_ready,
     input   wire        scan_code_valid,
     input   wire [7:0]  scan_code_byte,
-    output  logic       scan_code_extended,
-    output  logic       scan_code_special,
 
-    output  reg         caps_lock,
-    output  logic       control,
-    output  reg         num_lock,
-    output  logic       shift,
+    output  reg         num_lock_is_on,
+    output  logic       control_is_down,
+    output  reg         caps_lock_is_on,
+    output  reg         scroll_lock_is_on,
+    output  logic       shift_is_down,
 
-    output  logic       ack_scan_code_received,
-
-    output  logic       resend_scan_code_received,
-
-    output  logic       set_status,
-    output  logic       set_status_caps_lock,
-    output  logic       set_status_num_lock,
-    output  logic       set_status_scroll_lock
+    output  logic       scan_code_is_ack,
+    output  logic       scan_code_is_extended,
+    output  logic       scan_code_is_resend,
+    output  logic       scan_code_is_special,
+    output  logic       scan_code_is_status,
 );
 
     localparam  EXTENDED = YES;
@@ -68,7 +64,6 @@ module ps2_state
     reg         extended;
     reg         released;
 
-    reg         scroll_lock;
     reg         left_shift;
     reg         right_shift;
     reg         left_control;
@@ -88,9 +83,9 @@ module ps2_state
         extended = NO;
         released = NO;
 
-        caps_lock = NO;
-        num_lock = NO;
-        scroll_lock = NO;
+        caps_lock_is_on = NO;
+        num_lock_is_on = NO;
+        scroll_lock_is_on = NO;
 
         left_shift = NO;
         right_shift = NO;
@@ -99,15 +94,12 @@ module ps2_state
     end
 
     always_comb begin
-        scan_code_extended = extended;
-        scan_code_special = NO;
+        scan_code_is_extended = extended;
+        scan_code_is_special = NO;
 
-        ack_scan_code_received = NO;
-        resend_scan_code_received = NO;
-        set_status = NO;
-        set_status_caps_lock = caps_lock;
-        set_status_num_lock = num_lock;
-        set_status_scroll_lock = scroll_lock;
+        scan_code_is_ack = NO;
+        scan_code_is_resend = NO;
+        scan_code_is_status = NO;
 
         set_extended = NO;
         set_released = NO;
@@ -121,75 +113,71 @@ module ps2_state
         set_left_control = NO;
         set_right_control = NO;
 
-        control = left_control | right_control;
-        shift = left_shift | right_shift;
+        control_is_down = left_control | right_control;
+        shift_is_down = left_shift | right_shift;
 
         if (scan_code_valid == YES && scan_code_ready == YES) begin
             case ({scan_code_byte, extended})
                 {SCAN_CODE_ACK, NORMAL}: begin
-                    scan_code_special = YES;
-                    ack_scan_code_received = YES;
+                    scan_code_is_special = YES;
+                    scan_code_is_ack = YES;
                 end
                 {SCAN_CODE_CAPS_LOCK, NORMAL}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     if (released == NO) begin
                         toggle_caps_lock = YES;
-                        set_status = YES;
+                        scan_code_is_status = YES;
                     end
                 end
                 {SCAN_CODE_CONTROL, NORMAL}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     set_left_control = YES;
-                    set_status = YES;
                 end
                 {SCAN_CODE_CONTROL, EXTENDED}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     set_right_control = YES;
-                    set_status = YES;
                 end
                 {SCAN_CODE_EXTENDED, NORMAL}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     set_extended = YES;
                 end
                 {SCAN_CODE_LEFT_SHIFT, NORMAL}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     set_left_shift = YES;
-                    set_status = YES;
                 end
                 {SCAN_CODE_NUM_LOCK, NORMAL}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     if (released == NO) begin
                         toggle_num_lock = YES;
-                        set_status = YES;
+                        scan_code_is_status = YES;
                     end
                 end
                 {SCAN_CODE_RELEASED, NORMAL_OR_EXTENDED}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     set_released = YES;
                 end
                 {SCAN_CODE_RESEND, NORMAL}: begin
-                    scan_code_special = YES;
-                    resend_scan_code_received = YES;
+                    scan_code_is_special = YES;
+                    scan_code_is_resend = YES;
                 end
                 {SCAN_CODE_RIGHT_SHIFT, NORMAL}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     set_right_shift = YES;
-                    set_status = YES;
                 end
                 {SCAN_CODE_SCROLL_LOCK, NORMAL}: begin
-                    scan_code_special = YES;
+                    scan_code_is_special = YES;
                     if (released == NO) begin
                         toggle_scroll_lock = YES;
-                        set_status = YES;
+                        scan_code_is_status = YES;
                     end
                 end
                 {SCAN_CODE_SELF_TEST, NORMAL}: begin
-                    scan_code_special = YES;
-                    set_status = YES;
+                    scan_code_is_special = YES;
+                    scan_code_is_status = YES;
                 end
                 default: begin
                     if (released == YES) begin
-                        scan_code_special = YES;
+                        scan_code_is_special = YES;
                     end
                 end
             endcase
@@ -210,13 +198,13 @@ module ps2_state
             end
 
             if (toggle_caps_lock) begin
-                caps_lock <= ~caps_lock;
+                caps_lock_is_on <= ~caps_lock_is_on;
             end
             if (toggle_num_lock) begin
-                num_lock <= ~num_lock;
+                num_lock_is_on <= ~num_lock_is_on;
             end
             if (toggle_scroll_lock) begin
-                scroll_lock <= ~scroll_lock;
+                scroll_lock_is_on <= ~scroll_lock_is_on;
             end
 
             if (set_left_shift) begin
@@ -237,9 +225,9 @@ module ps2_state
             extended <= NO;
             released <= NO;
 
-            caps_lock <= NO;
-            num_lock <= NO;
-            scroll_lock <= NO;
+            caps_lock_is_on <= NO;
+            num_lock_is_on <= NO;
+            scroll_lock_is_on <= NO;
 
             left_shift <= NO;
             right_shift <= NO;

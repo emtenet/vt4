@@ -1,7 +1,7 @@
 //  # PS/2 commands
 
-//  Translate high level PS/2 commands to
-//  individual data bytes and their acknowledgement.
+//  Translate high level PS/2 commands to individual
+//  command codes and their acknowledgements.
 
 `default_nettype none
 `timescale 1ns / 1ps
@@ -10,22 +10,21 @@ module ps2_commands
     input   wire        clk,
     input   wire        reset_low,
 
-    input   wire        ack_scan_code_received,
+    input   wire        scan_code_is_ack,
+    input   wire        scan_code_is_resend,
+    input   wire        scan_code_is_status,
 
-    input   wire        resend_scan_code_received,
+    input   wire        caps_lock_is_on,
+    input   wire        num_lock_is_on,
+    input   wire        scroll_lock_is_on,
 
-    input   wire        set_status,
-    input   wire        set_status_caps_lock,
-    input   wire        set_status_num_lock,
-    input   wire        set_status_scroll_lock,
+    input   wire        command_code_ready,
+    output  logic       command_code_valid,
+    output  reg [7:0]   command_code_byte,
 
-    input   wire        command_ready,
-    output  logic       command_valid,
-    output  reg [7:0]   command_byte,
-
-    output  logic       command_received_ready,
-    input   wire        command_received_valid,
-    input   wire        command_received_error,
+    output  logic       command_code_ack_ready,
+    input   wire        command_code_ack_valid,
+    input   wire        command_code_ack_error,
 );
 
     //==========================================
@@ -40,7 +39,7 @@ module ps2_commands
         .clk(clk),
         .reset_low(reset_low),
 
-        .made(resend_scan_code_received),
+        .made(scan_code_is_resend),
         .request(resend_request),
         .taken(resend_taken)
     );
@@ -57,7 +56,7 @@ module ps2_commands
         .clk(clk),
         .reset_low(reset_low),
 
-        .made(set_status),
+        .made(scan_code_is_status),
         .request(set_status_request),
         .taken(set_status_taken)
     );
@@ -158,26 +157,26 @@ module ps2_commands
 
     initial begin
         command_state = COMMAND_STATE_IDLE;
-        command_valid = NO;
-        command_byte = 8'h00;
+        command_code_valid = NO;
+        command_code_byte = 8'h00;
     end
 
     always_comb begin
-        command_valid = NO;
-        command_received_ready = NO;
+        command_code_valid = NO;
+        command_code_ack_ready = NO;
         command_acknowledged = NO;
 
         case (command_state)
             COMMAND_STATE_IDLE: begin
             end
             COMMAND_STATE_SEND: begin
-                command_valid = YES;
+                command_code_valid = YES;
             end
             COMMAND_STATE_RECEIVED: begin
-                command_received_ready = YES;
+                command_code_ack_ready = YES;
             end
             COMMAND_STATE_ACKNOWLEDGE: begin
-                command_acknowledged = ack_scan_code_received;
+                command_acknowledged = scan_code_is_ack;
             end
         endcase
     end
@@ -191,26 +190,31 @@ module ps2_commands
 
                 if (command_set_status) begin
                     command_state <= COMMAND_STATE_SEND;
-                    command_byte <= COMMAND_SET_STATUS;
+                    command_code_byte <= COMMAND_SET_STATUS;
                 end
 
                 if (command_set_status_leds) begin
                     command_state <= COMMAND_STATE_SEND;
-                    command_byte <= {5'b0, set_status_caps_lock, set_status_num_lock, set_status_scroll_lock};
+                    command_code_byte <= {
+                        5'b0,
+                        caps_lock_is_on,
+                        num_lock_is_on,
+                        scroll_lock_is_on
+                    };
                 end
             end
             COMMAND_STATE_SEND: begin
-                if (command_ready == YES) begin
+                if (command_code_ready == YES) begin
                     command_state <= COMMAND_STATE_RECEIVED;
                 end
             end
             COMMAND_STATE_RECEIVED: begin
-                if (command_received_valid == YES) begin
+                if (command_code_ack_valid == YES) begin
                     command_state <= COMMAND_STATE_ACKNOWLEDGE;
                 end
             end
             COMMAND_STATE_ACKNOWLEDGE: begin
-                if (ack_scan_code_received) begin
+                if (scan_code_is_ack) begin
                     command_state <= COMMAND_STATE_IDLE;
                 end
             end
@@ -218,7 +222,7 @@ module ps2_commands
 
         if (reset_low == LOW) begin
             command_state <= COMMAND_STATE_IDLE;
-            command_byte <= 8'h00;
+            command_code_byte <= 8'h00;
         end
     end
 
