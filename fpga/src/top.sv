@@ -67,13 +67,13 @@ module top
     // PS/2 frame logic
     //==========================================
 
+    wire        display_code_ready;
+    wire        display_code_valid;
+    wire [7:0]  display_code_byte;
+
     wire        key_code_ready;
     wire        key_code_valid;
     wire [7:0]  key_code_byte;
-
-    wire        screen_code_ready;
-    wire        screen_code_valid;
-    wire [7:0]  screen_code_byte;
 
     ps2 ps2
     (
@@ -85,7 +85,7 @@ module top
 
         .character_ready(key_code_ready),
         .character_valid(key_code_valid),
-        .character_byte(key_code_byte)
+        .character_byte(key_code_byte),
     );
 
     uart
@@ -98,20 +98,20 @@ module top
         .clk(clk),
         .reset_low(reset_low),
 
-        .rx_pin(uart4_rx),
-        .rx_ready(screen_code_ready),
-        .rx_valid(screen_code_valid),
-        .rx_byte(screen_code_byte),
+        .rx_pin(uart1_rx),
+        .rx_ready(display_code_ready),
+        .rx_valid(display_code_valid),
+        .rx_byte(display_code_byte),
 
-        .tx_pin(uart4_tx),
+        .tx_pin(uart1_tx),
         .tx_ready(key_code_ready),
         .tx_valid(key_code_valid),
         .tx_byte(key_code_byte)
     );
 
-    // assign screen_code_ready = key_code_ready;
-    // assign screen_code_valid = key_code_valid;
-    // assign screen_code_byte = key_code_byte;
+    // assign display_code_ready = key_code_ready;
+    // assign display_code_valid = key_code_valid;
+    // assign display_code_byte = key_code_byte;
 
     //==========================================
     // VRAM
@@ -160,9 +160,9 @@ module top
         .clk(clk),
         .reset_low(reset_low),
 
-        .host_ready(screen_code_ready),
-        .host_valid(screen_code_valid),
-        .host_byte(screen_code_byte),
+        .display_code_ready(display_code_ready),
+        .display_code_valid(display_code_valid),
+        .display_code_byte(display_code_byte),
 
         .vram_ready(vram_write_ready),
         .vram_valid(vram_write_valid),

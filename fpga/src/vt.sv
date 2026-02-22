@@ -5,9 +5,9 @@ module vt
     input   wire        clk,
     input   wire        reset_low,
 
-    output  logic       host_ready,
-    input   wire        host_valid,
-    input   wire [7:0]  host_byte,
+    output  logic       display_code_ready,
+    input   wire        display_code_valid,
+    input   wire [7:0]  display_code_byte,
 
     input   wire        vram_ready,
     output  logic       vram_valid,
@@ -64,7 +64,7 @@ module vt
     end
 
     always_comb begin
-        host_ready = NO;
+        display_code_ready = NO;
 
         vram_valid = NO;
         vram_row = cursor_row;
@@ -82,10 +82,10 @@ module vt
 
         case (state)
             STATE_IDLE: begin
-                host_ready = YES;
+                display_code_ready = YES;
 
-                if (host_valid) begin
-                    case (host_byte)
+                if (display_code_valid) begin
+                    case (display_code_byte)
                         CONTROL_BS: begin
                             if (cursor_col != LEFT_COL) begin
                                 cursor_left = YES;
@@ -143,7 +143,7 @@ module vt
     always @(posedge clk) begin
         if (display) begin
             state <= STATE_DISPLAY;
-            display_byte <= host_byte;
+            display_byte <= display_code_byte;
         end
         if (cursor_down) begin
             cursor_row <= cursor_row + 1;
