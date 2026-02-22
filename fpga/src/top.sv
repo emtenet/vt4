@@ -7,7 +7,7 @@ module top
     inout wire          ps2_clk,
     inout wire          ps2_data,
 
-    input wire          uart4_rx,
+    input wire          uart3_rx,
     output wire         uart4_tx,
 
     input wire [1:0]    button,
@@ -46,24 +46,6 @@ module top
     );
 
     //==========================================
-    // Button press sends a PS/2 command
-    //==========================================
-
-    // wire    command_ready;
-    // wire    command_valid;
-
-    // button_handshake for_button
-    // (
-    //     .clk(clk),
-    //     .reset_low(reset_low),
-
-    //     .button(button[0]),
-
-    //     .ready(command_ready),
-    //     .valid(command_valid)
-    // );
-
-    //==========================================
     // PS/2 frame logic
     //==========================================
 
@@ -98,20 +80,16 @@ module top
         .clk(clk),
         .reset_low(reset_low),
 
-        .rx_pin(uart1_rx),
+        .rx_pin(uart3_rx),
         .rx_ready(display_code_ready),
         .rx_valid(display_code_valid),
         .rx_byte(display_code_byte),
 
-        .tx_pin(uart1_tx),
+        .tx_pin(uart4_tx),
         .tx_ready(key_code_ready),
         .tx_valid(key_code_valid),
         .tx_byte(key_code_byte)
     );
-
-    // assign display_code_ready = key_code_ready;
-    // assign display_code_valid = key_code_valid;
-    // assign display_code_byte = key_code_byte;
 
     //==========================================
     // VRAM
@@ -201,9 +179,5 @@ module top
         .hdmi_data_n(hdmi_data_n),
         .hdmi_data_p(hdmi_data_p)
     );
-
-    // assign led = ~{scan_code_error, 5'b0};
-
-    // assign diagnosis = {2'b0, scan_code_error, ~reset_low};
 
 endmodule
