@@ -26,7 +26,7 @@ module uart
     #(
         .CYCLES(255)
     )
-    for_ps2_clk
+    for_uart_rx
     (
         .clk(clk),
         .reset_low(reset_low),
