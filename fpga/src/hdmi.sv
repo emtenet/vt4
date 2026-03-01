@@ -16,6 +16,9 @@ module hdmi
     input   wire [4:0]  cursor_row,
     input   wire [6:0]  cursor_col,
 
+    input   wire [1:0]  display_port,
+    output  wire        v_sync,
+
     output  wire        hdmi_clk_n,
     output  wire        hdmi_clk_p,
     output  wire [2:0]  hdmi_data_n,
@@ -40,6 +43,10 @@ module hdmi
         .h_start(stage0_h_start),
         .v_start(stage0_v_start)
     );
+
+    always_comb begin
+        v_sync = stage0_v_sync;
+    end
 
     // STAGE 1 - 100 x 30 text display
 
@@ -163,10 +170,21 @@ module hdmi
         end
     end
 
+    wire [23:0]  border_rgb;
+
+    always_comb begin
+        case (display_port)
+            2'h0: border_rgb = 24'b110000000000000000000000;
+            2'h1: border_rgb = 24'b000000001100000000000000;
+            2'h2: border_rgb = 24'b000000000000000011000000;
+            2'h3: border_rgb = 24'b110000001100000011000000;
+        endcase
+    end
+
     always_comb begin
         stage4_pixel = stage4_pixels[9];
         if (stage4_border == YES) begin
-            stage4_rgb = 24'b11000000_00000000_00000000;
+            stage4_rgb = border_rgb;
         end else begin
             stage4_rgb = {3{stage4_pixel,7'b0}};
         end

@@ -46,6 +46,31 @@ module top
     );
 
     //==========================================
+    // Port switching
+    //==========================================
+
+    // switch during V-SYNC
+    wire        v_sync;
+    reg [1:0]   display_port;
+    wire        display_switch_ready;
+    wire        display_switch_valid;
+    wire [1:0]  display_switch_to;
+
+    initial begin
+        display_port = 2'h0;
+    end
+
+    always_comb begin
+        display_switch_ready = v_sync;
+    end
+
+    always_ff @(posedge clk) begin
+        if (display_switch_valid == YES && display_switch_ready == YES) begin
+            display_port <= display_switch_to;
+        end
+    end
+
+    //==========================================
     // PS/2 frame logic
     //==========================================
 
@@ -60,6 +85,10 @@ module top
 
         .ps2_clk(ps2_clk),
         .ps2_data(ps2_data),
+
+        .display_switch_ready(display_switch_ready),
+        .display_switch_valid(display_switch_valid),
+        .display_switch_to(display_switch_to),
 
         .character_ready(character_ready),
         .character_valid(character_valid),
@@ -154,6 +183,9 @@ module top
         .vram_row(vram_read_row[3]),
         .vram_col(vram_read_col[3]),
         .vram_byte(vram_read_byte[3]),
+
+        .display_port(display_port),
+        .v_sync(v_sync),
 
         .hdmi_clk_n(hdmi_clk_n),
         .hdmi_clk_p(hdmi_clk_p),

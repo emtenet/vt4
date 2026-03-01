@@ -8,6 +8,10 @@ module ps2
     inout   wire        ps2_clk,
     inout   wire        ps2_data,
 
+    input   wire        display_switch_ready,
+    output  reg         display_switch_valid,
+    output  reg [1:0]   display_switch_to,
+
     input   wire        character_ready,
     output  wire        character_valid,
     output  wire [7:0]  character_byte,
@@ -116,6 +120,10 @@ module ps2
         .scan_code_is_resend(scan_code_is_resend),
         .scan_code_is_special(scan_code_is_special),
         .scan_code_is_status(scan_code_is_status),
+
+        .display_switch_ready(display_switch_ready),
+        .display_switch_valid(display_switch_valid),
+        .display_switch_to(display_switch_to),
     );
 
     ps2_commands ps2_commands

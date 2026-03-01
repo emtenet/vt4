@@ -39,6 +39,10 @@ module ps2_state
     output  logic       scan_code_is_resend,
     output  logic       scan_code_is_special,
     output  logic       scan_code_is_status,
+
+    input   wire        display_switch_ready,
+    output  reg         display_switch_valid,
+    output  reg [1:0]   display_switch_to,
 );
 
     localparam  EXTENDED = YES;
@@ -46,9 +50,14 @@ module ps2_state
     localparam  NORMAL_OR_EXTENDED = 1'bx;
 
     localparam  SCAN_CODE_ACK           = 8'hFA;
+    localparam  SCAN_CODE_ALT           = 8'h11;
     localparam  SCAN_CODE_CAPS_LOCK     = 8'h58;
     localparam  SCAN_CODE_CONTROL       = 8'h14;
     localparam  SCAN_CODE_EXTENDED      = 8'hE0;
+    localparam  SCAN_CODE_F1            = 8'h05;
+    localparam  SCAN_CODE_F2            = 8'h06;
+    localparam  SCAN_CODE_F3            = 8'h04;
+    localparam  SCAN_CODE_F4            = 8'h0C;
     localparam  SCAN_CODE_LEFT_SHIFT    = 8'h12;
     localparam  SCAN_CODE_NUM_LOCK      = 8'h77;
     localparam  SCAN_CODE_RELEASED      = 8'hF0;
@@ -64,20 +73,27 @@ module ps2_state
     reg         extended;
     reg         released;
 
-    reg         left_shift;
-    reg         right_shift;
-    reg         left_control;
-    reg         right_control;
+    logic       alt_is_down;
+    reg         left_alt_is_down;
+    reg         right_alt_is_down;
+    reg         left_shift_is_down;
+    reg         right_shift_is_down;
+    reg         left_control_is_down;
+    reg         right_control_is_down;
 
     logic       set_extended;
     logic       set_released;
     logic       toggle_caps_lock;
     logic       toggle_num_lock;
     logic       toggle_scroll_lock;
-    logic       set_left_shift;
-    logic       set_right_shift;
-    logic       set_left_control;
-    logic       set_right_control;
+    logic       set_left_alt_is_down;
+    logic       set_right_alt_is_down;
+    logic       set_left_shift_is_down;
+    logic       set_right_shift_is_down;
+    logic       set_left_control_is_down;
+    logic       set_right_control_is_down;
+    logic       set_display_switch;
+    logic [1:0] set_display_switch_to;
 
     initial begin
         extended = NO;
@@ -87,10 +103,15 @@ module ps2_state
         num_lock_is_on = NO;
         scroll_lock_is_on = NO;
 
-        left_shift = NO;
-        right_shift = NO;
-        left_control = NO;
-        right_control = NO;
+        left_alt_is_down = NO;
+        right_alt_is_down = NO;
+        left_shift_is_down = NO;
+        right_shift_is_down = NO;
+        left_control_is_down = NO;
+        right_control_is_down = NO;
+
+        display_switch_valid = NO;
+        display_switch_to = 2'h0;
     end
 
     always_comb begin
@@ -108,19 +129,33 @@ module ps2_state
         toggle_num_lock = NO;
         toggle_scroll_lock = NO;
 
-        set_left_shift = NO;
-        set_right_shift = NO;
-        set_left_control = NO;
-        set_right_control = NO;
+        set_left_alt_is_down = NO;
+        set_right_alt_is_down = NO;
+        set_left_shift_is_down = NO;
+        set_right_shift_is_down = NO;
+        set_left_control_is_down = NO;
+        set_right_control_is_down = NO;
 
-        control_is_down = left_control | right_control;
-        shift_is_down = left_shift | right_shift;
+        set_display_switch = NO;
+        set_display_switch_to = 2'h0;
+
+        alt_is_down = left_alt_is_down | right_alt_is_down;
+        control_is_down = left_control_is_down | right_control_is_down;
+        shift_is_down = left_shift_is_down | right_shift_is_down;
 
         if (scan_code_valid == YES && scan_code_ready == YES) begin
             case ({scan_code_byte, extended})
                 {SCAN_CODE_ACK, NORMAL}: begin
                     scan_code_is_special = YES;
                     scan_code_is_ack = YES;
+                end
+                {SCAN_CODE_ALT, NORMAL}: begin
+                    scan_code_is_special = YES;
+                    set_left_alt_is_down = YES;
+                end
+                {SCAN_CODE_ALT, EXTENDED}: begin
+                    scan_code_is_special = YES;
+                    set_right_alt_is_down = YES;
                 end
                 {SCAN_CODE_CAPS_LOCK, NORMAL}: begin
                     scan_code_is_special = YES;
@@ -131,19 +166,55 @@ module ps2_state
                 end
                 {SCAN_CODE_CONTROL, NORMAL}: begin
                     scan_code_is_special = YES;
-                    set_left_control = YES;
+                    set_left_control_is_down = YES;
                 end
                 {SCAN_CODE_CONTROL, EXTENDED}: begin
                     scan_code_is_special = YES;
-                    set_right_control = YES;
+                    set_right_control_is_down = YES;
                 end
                 {SCAN_CODE_EXTENDED, NORMAL}: begin
                     scan_code_is_special = YES;
                     set_extended = YES;
                 end
+                {SCAN_CODE_F1, NORMAL}: begin
+                    if (released == YES) begin
+                        scan_code_is_special = YES;
+                    end else begin
+                        scan_code_is_special = alt_is_down;
+                        set_display_switch = alt_is_down;
+                        set_display_switch_to = 2'h0;
+                    end
+                end
+                {SCAN_CODE_F2, NORMAL}: begin
+                    if (released == YES) begin
+                        scan_code_is_special = YES;
+                    end else begin
+                        scan_code_is_special = alt_is_down;
+                        set_display_switch = alt_is_down;
+                        set_display_switch_to = 2'h1;
+                    end
+                end
+                {SCAN_CODE_F3, NORMAL}: begin
+                    if (released == YES) begin
+                        scan_code_is_special = YES;
+                    end else begin
+                        scan_code_is_special = alt_is_down;
+                        set_display_switch = alt_is_down;
+                        set_display_switch_to = 2'h2;
+                    end
+                end
+                {SCAN_CODE_F4, NORMAL}: begin
+                    if (released == YES) begin
+                        scan_code_is_special = YES;
+                    end else begin
+                        scan_code_is_special = alt_is_down;
+                        set_display_switch = alt_is_down;
+                        set_display_switch_to = 2'h3;
+                    end
+                end
                 {SCAN_CODE_LEFT_SHIFT, NORMAL}: begin
                     scan_code_is_special = YES;
-                    set_left_shift = YES;
+                    set_left_shift_is_down = YES;
                 end
                 {SCAN_CODE_NUM_LOCK, NORMAL}: begin
                     scan_code_is_special = YES;
@@ -162,7 +233,7 @@ module ps2_state
                 end
                 {SCAN_CODE_RIGHT_SHIFT, NORMAL}: begin
                     scan_code_is_special = YES;
-                    set_right_shift = YES;
+                    set_right_shift_is_down = YES;
                 end
                 {SCAN_CODE_SCROLL_LOCK, NORMAL}: begin
                     scan_code_is_special = YES;
@@ -207,18 +278,32 @@ module ps2_state
                 scroll_lock_is_on <= ~scroll_lock_is_on;
             end
 
-            if (set_left_shift) begin
-                left_shift <= ~released;
+            if (set_left_alt_is_down) begin
+                left_alt_is_down <= ~released;
             end
-            if (set_right_shift) begin
-                right_shift <= ~released;
+            if (set_right_alt_is_down) begin
+                right_alt_is_down <= ~released;
             end
-            if (set_left_control) begin
-                left_control <= ~released;
+            if (set_left_shift_is_down) begin
+                left_shift_is_down <= ~released;
             end
-            if (set_right_control) begin
-                right_control <= ~released;
+            if (set_right_shift_is_down) begin
+                right_shift_is_down <= ~released;
             end
+            if (set_left_control_is_down) begin
+                left_control_is_down <= ~released;
+            end
+            if (set_right_control_is_down) begin
+                right_control_is_down <= ~released;
+            end
+        end
+
+        if (display_switch_valid && display_switch_ready) begin
+            display_switch_valid <= NO;
+        end
+        if (set_display_switch) begin
+            display_switch_valid <= YES;
+            display_switch_to <= set_display_switch_to;
         end
 
         if (reset_low == LOW) begin
@@ -229,10 +314,15 @@ module ps2_state
             num_lock_is_on <= NO;
             scroll_lock_is_on <= NO;
 
-            left_shift <= NO;
-            right_shift <= NO;
-            left_control <= NO;
-            right_control <= NO;
+            left_alt_is_down <= NO;
+            right_alt_is_down <= NO;
+            left_shift_is_down <= NO;
+            right_shift_is_down <= NO;
+            left_control_is_down <= NO;
+            right_control_is_down <= NO;
+
+            display_switch_valid <= NO;
+            display_switch_to <= 2'h0;
         end
     end
 
