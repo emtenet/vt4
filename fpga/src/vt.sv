@@ -12,9 +12,9 @@ module vt
     input   wire        uart_rx_pin,
     output  wire        uart_tx_pin,
 
-    input   wire        key_code_ready,
-    output  logic       key_code_valid,
-    output  logic [7:0] key_code_byte,
+    output  logic       key_code_ready,
+    input   wire        key_code_valid,
+    input   wire [7:0]  key_code_byte,
 
     output  wire        vram_read_ready,
     input   wire        vram_read_valid,

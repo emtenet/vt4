@@ -44,25 +44,25 @@ IO_PORT "ps2_clk" IO_TYPE=LVCMOS33 PULL_MODE=NONE OPEN_DRAIN=ON;
 IO_LOC "ps2_data" 56;
 IO_PORT "ps2_data" IO_TYPE=LVCMOS33 PULL_MODE=NONE OPEN_DRAIN=ON;
 //
-IO_LOC "uart1_tx" 53;
-IO_PORT "uart1_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart1_rx" 51;
-IO_PORT "uart1_rx" IO_TYPE=LVCMOS33;
+IO_LOC "uart_tx[0]" 53;
+IO_PORT "uart_tx[0]" IO_TYPE=LVCMOS33;
+IO_LOC "uart_rx[0]" 51;
+IO_PORT "uart_rx[0]" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart2_tx" 54;
-IO_PORT "uart2_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart2_rx" 55;
-IO_PORT "uart2_rx" IO_TYPE=LVCMOS33;
+IO_LOC "uart_tx[1]" 54;
+IO_PORT "uart_tx[1]" IO_TYPE=LVCMOS33;
+IO_LOC "uart_rx[1]" 55;
+IO_PORT "uart_rx[1]" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart3_tx" 49;
-IO_PORT "uart3_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart3_rx" 48;
-IO_PORT "uart3_rx" IO_TYPE=LVCMOS33;
+IO_LOC "uart_tx[2]" 49;
+IO_PORT "uart_tx[2]" IO_TYPE=LVCMOS33;
+IO_LOC "uart_rx[2]" 48;
+IO_PORT "uart_rx[2]" IO_TYPE=LVCMOS33;
 //
-IO_LOC "uart4_tx" 31;
-IO_PORT "uart4_tx" IO_TYPE=LVCMOS33;
-IO_LOC "uart4_rx" 32;
-IO_PORT "uart4_rx" IO_TYPE=LVCMOS33;
+IO_LOC "uart_tx[3]" 31;
+IO_PORT "uart_tx[3]" IO_TYPE=LVCMOS33;
+IO_LOC "uart_rx[3]" 32;
+IO_PORT "uart_rx[3]" IO_TYPE=LVCMOS33;
 //
 IO_LOC "feram_cs" 37;
 IO_PORT "feram_cs" IO_TYPE=LVCMOS33;

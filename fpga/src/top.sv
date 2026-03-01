@@ -7,8 +7,8 @@ module top
     inout wire          ps2_clk,
     inout wire          ps2_data,
 
-    input wire          uart3_rx,
-    output wire         uart4_tx,
+    input wire [3:0]    uart_rx,
+    output wire [3:0]   uart_tx,
 
     input wire [1:0]    button,
     output wire [5:0]   led,
@@ -49,9 +49,9 @@ module top
     // PS/2 frame logic
     //==========================================
 
-    wire        key_code_ready;
-    wire        key_code_valid;
-    wire [7:0]  key_code_byte;
+    wire        character_ready;
+    wire        character_valid;
+    wire [7:0]  character_byte;
 
     ps2 ps2
     (
@@ -61,54 +61,79 @@ module top
         .ps2_clk(ps2_clk),
         .ps2_data(ps2_data),
 
-        .character_ready(key_code_ready),
-        .character_valid(key_code_valid),
-        .character_byte(key_code_byte),
+        .character_ready(character_ready),
+        .character_valid(character_valid),
+        .character_byte(character_byte),
     );
+
+    wire        key_code_ready [3:0];
+    wire        key_code_valid [3:0];
+    wire [7:0]  key_code_byte [3:0];
+
+    always_comb begin
+        key_code_valid[0] = NO;
+        key_code_byte[0] = 8'h00;
+
+        key_code_valid[1] = NO;
+        key_code_byte[1] = 8'h00;
+
+        character_ready = key_code_ready[2];
+        key_code_valid[2] = character_valid;
+        key_code_byte[2] = character_byte;
+
+        key_code_valid[3] = NO;
+        key_code_byte[3] = 8'h00;
+    end
 
     //==========================================
     // Write characters to VRAM
     //==========================================
 
-    wire        vram_read_ready;
-    wire        vram_read_valid;
-    wire [4:0]  vram_read_row;
-    wire [6:0]  vram_read_col;
-    wire [7:0]  vram_read_byte;
+    wire        vram_read_ready [3:0];
+    wire        vram_read_valid [3:0];
+    wire [4:0]  vram_read_row [3:0];
+    wire [6:0]  vram_read_col [3:0];
+    wire [7:0]  vram_read_byte [3:0];
 
-    wire [4:0]  top_row;
+    wire [4:0]  top_row [3:0];
 
-    wire [4:0]  cursor_row;
-    wire [6:0]  cursor_col;
+    wire [4:0]  cursor_row [3:0];
+    wire [6:0]  cursor_col [3:0];
 
-    vt
-    #(
-        .CLK(51_800_000),
-        .BAUD(115200)
-    )
-    vt4
-    (
-        .clk(clk),
-        .reset_low(reset_low),
+    generate
+        genvar i;
 
-        .uart_rx_pin(uart3_rx),
-        .uart_tx_pin(uart4_tx),
+        for(i=0; i<4; i=i+1) begin : vt_ports
+            vt
+            #(
+                .CLK(51_800_000),
+                .BAUD(115200)
+            )
+            vt
+            (
+                .clk(clk),
+                .reset_low(reset_low),
 
-        .key_code_ready(key_code_ready),
-        .key_code_valid(key_code_valid),
-        .key_code_byte(key_code_byte),
+                .uart_rx_pin(uart_rx[i]),
+                .uart_tx_pin(uart_tx[i]),
 
-        .vram_read_ready(vram_read_ready),
-        .vram_read_valid(vram_read_valid),
-        .vram_read_row(vram_read_row),
-        .vram_read_col(vram_read_col),
-        .vram_read_byte(vram_read_byte),
+                .key_code_ready(key_code_ready[i]),
+                .key_code_valid(key_code_valid[i]),
+                .key_code_byte(key_code_byte[i]),
 
-        .top_row(top_row),
+                .vram_read_ready(vram_read_ready[i]),
+                .vram_read_valid(vram_read_valid[i]),
+                .vram_read_row(vram_read_row[i]),
+                .vram_read_col(vram_read_col[i]),
+                .vram_read_byte(vram_read_byte[i]),
 
-        .cursor_row(cursor_row),
-        .cursor_col(cursor_col)
-    );
+                .top_row(top_row[i]),
+
+                .cursor_row(cursor_row[i]),
+                .cursor_col(cursor_col[i])
+            );
+        end
+    endgenerate
 
     //==========================================
     // Display VRAM to HDMI
@@ -120,15 +145,15 @@ module top
         .clk_5x(clk_5x),
         .reset_low(reset_low),
 
-        .top_row(top_row),
+        .top_row(top_row[3]),
 
-        .cursor_row(cursor_row),
-        .cursor_col(cursor_col),
+        .cursor_row(cursor_row[3]),
+        .cursor_col(cursor_col[3]),
 
-        .vram_valid(vram_read_valid),
-        .vram_row(vram_read_row),
-        .vram_col(vram_read_col),
-        .vram_byte(vram_read_byte),
+        .vram_valid(vram_read_valid[3]),
+        .vram_row(vram_read_row[3]),
+        .vram_col(vram_read_col[3]),
+        .vram_byte(vram_read_byte[3]),
 
         .hdmi_clk_n(hdmi_clk_n),
         .hdmi_clk_p(hdmi_clk_p),
