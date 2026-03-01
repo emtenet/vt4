@@ -49,10 +49,6 @@ module top
     // PS/2 frame logic
     //==========================================
 
-    wire        display_code_ready;
-    wire        display_code_valid;
-    wire [7:0]  display_code_byte;
-
     wire        key_code_ready;
     wire        key_code_valid;
     wire [7:0]  key_code_byte;
@@ -68,27 +64,6 @@ module top
         .character_ready(key_code_ready),
         .character_valid(key_code_valid),
         .character_byte(key_code_byte),
-    );
-
-    uart
-    #(
-        .CLK(51_800_000),
-        .BAUD(115200)
-    )
-    uart
-    (
-        .clk(clk),
-        .reset_low(reset_low),
-
-        .rx_pin(uart3_rx),
-        .rx_ready(display_code_ready),
-        .rx_valid(display_code_valid),
-        .rx_byte(display_code_byte),
-
-        .tx_pin(uart4_tx),
-        .tx_ready(key_code_ready),
-        .tx_valid(key_code_valid),
-        .tx_byte(key_code_byte)
     );
 
     //==========================================
@@ -133,14 +108,22 @@ module top
     wire [4:0]  cursor_row;
     wire [6:0]  cursor_col;
 
-    vt vt
+    vt
+    #(
+        .CLK(51_800_000),
+        .BAUD(115200)
+    )
+    vt4
     (
         .clk(clk),
         .reset_low(reset_low),
 
-        .display_code_ready(display_code_ready),
-        .display_code_valid(display_code_valid),
-        .display_code_byte(display_code_byte),
+        .uart_rx_pin(uart3_rx),
+        .uart_tx_pin(uart4_tx),
+
+        .key_code_ready(key_code_ready),
+        .key_code_valid(key_code_valid),
+        .key_code_byte(key_code_byte),
 
         .vram_ready(vram_write_ready),
         .vram_valid(vram_write_valid),

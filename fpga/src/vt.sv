@@ -1,13 +1,20 @@
 `default_nettype none
 `timescale 1ns / 1ps
 module vt
+#(
+    parameter CLK = 0, // MHz
+    parameter BAUD = 0 // Baud rate
+)
 (
     input   wire        clk,
     input   wire        reset_low,
 
-    output  logic       display_code_ready,
-    input   wire        display_code_valid,
-    input   wire [7:0]  display_code_byte,
+    input   wire        uart_rx_pin,
+    output  wire        uart_tx_pin,
+
+    input   wire        key_code_ready,
+    output  logic       key_code_valid,
+    output  logic [7:0] key_code_byte,
 
     input   wire        vram_ready,
     output  logic       vram_valid,
@@ -20,6 +27,31 @@ module vt
     output  reg [4:0]   cursor_row,
     output  reg [6:0]   cursor_col
 );
+
+    wire        display_code_ready;
+    wire        display_code_valid;
+    wire [7:0]  display_code_byte;
+
+    uart
+    #(
+        .CLK(CLK),
+        .BAUD(BAUD)
+    )
+    uart
+    (
+        .clk(clk),
+        .reset_low(reset_low),
+
+        .rx_pin(uart_rx_pin),
+        .rx_ready(display_code_ready),
+        .rx_valid(display_code_valid),
+        .rx_byte(display_code_byte),
+
+        .tx_pin(uart_tx_pin),
+        .tx_ready(key_code_ready),
+        .tx_valid(key_code_valid),
+        .tx_byte(key_code_byte)
+    );
 
     localparam  LEFT_COL            = 7'd0;
     localparam  RIGHT_COL           = 7'd99;
