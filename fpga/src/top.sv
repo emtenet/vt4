@@ -51,22 +51,22 @@ module top
 
     // switch during V-SYNC
     wire        v_sync;
-    reg [1:0]   display_port;
-    wire        display_switch_ready;
-    wire        display_switch_valid;
-    wire [1:0]  display_switch_to;
+    reg [1:0]   active_port;
+    wire        switch_active_ready;
+    wire        switch_active_valid;
+    wire [1:0]  switch_active_to;
 
     initial begin
-        display_port = 2'h0;
+        active_port = 2'h0;
     end
 
     always_comb begin
-        display_switch_ready = v_sync;
+        switch_active_ready = v_sync;
     end
 
     always_ff @(posedge clk) begin
-        if (display_switch_valid == YES && display_switch_ready == YES) begin
-            display_port <= display_switch_to;
+        if (switch_active_valid == YES && switch_active_ready == YES) begin
+            active_port <= switch_active_to;
         end
     end
 
@@ -86,9 +86,9 @@ module top
         .ps2_clk(ps2_clk),
         .ps2_data(ps2_data),
 
-        .display_switch_ready(display_switch_ready),
-        .display_switch_valid(display_switch_valid),
-        .display_switch_to(display_switch_to),
+        .switch_active_ready(switch_active_ready),
+        .switch_active_valid(switch_active_valid),
+        .switch_active_to(switch_active_to),
 
         .character_ready(character_ready),
         .character_valid(character_valid),
@@ -150,16 +150,16 @@ module top
                 .key_code_valid(key_code_valid[i]),
                 .key_code_byte(key_code_byte[i]),
 
+                .top_row(top_row[i]),
+
+                .cursor_row(cursor_row[i]),
+                .cursor_col(cursor_col[i]),
+
                 .vram_read_ready(vram_read_ready[i]),
                 .vram_read_valid(vram_read_valid[i]),
                 .vram_read_row(vram_read_row[i]),
                 .vram_read_col(vram_read_col[i]),
                 .vram_read_byte(vram_read_byte[i]),
-
-                .top_row(top_row[i]),
-
-                .cursor_row(cursor_row[i]),
-                .cursor_col(cursor_col[i])
             );
         end
     endgenerate
@@ -168,23 +168,57 @@ module top
     // Display VRAM to HDMI
     //==========================================
 
+    wire [4:0]  active_top_row;
+    wire [4:0]  active_cursor_row;
+    wire [6:0]  active_cursor_col;
+    wire        active_vram_read_valid;
+    wire [4:0]  active_vram_read_row;
+    wire [6:0]  active_vram_read_col;
+    wire [7:0]  active_vram_read_byte;
+
+    always_comb begin
+        // inputs to HDMI
+        active_top_row = top_row[active_port];
+        active_cursor_row = cursor_row[active_port];
+        active_cursor_col = cursor_col[active_port];
+        active_vram_read_byte = vram_read_byte[active_port];
+    end
+
+    generate
+        genvar i;
+
+        for(i=0; i<4; i=i+1) begin : active_wiring
+            always_comb begin
+                if (active_port == i) begin
+                    vram_read_valid[i] = active_vram_read_valid;
+                    vram_read_row[i] = active_vram_read_row;
+                    vram_read_col[i] = active_vram_read_col;
+                end else begin
+                    vram_read_valid[i] = NO;
+                    vram_read_row[i] = 0;
+                    vram_read_col[i] = 0;
+                end
+            end
+        end
+    endgenerate
+
     hdmi hdmi
     (
         .clk(clk),
         .clk_5x(clk_5x),
         .reset_low(reset_low),
 
-        .top_row(top_row[3]),
+        .top_row(active_top_row),
 
-        .cursor_row(cursor_row[3]),
-        .cursor_col(cursor_col[3]),
+        .cursor_row(active_cursor_row),
+        .cursor_col(active_cursor_col),
 
-        .vram_valid(vram_read_valid[3]),
-        .vram_row(vram_read_row[3]),
-        .vram_col(vram_read_col[3]),
-        .vram_byte(vram_read_byte[3]),
+        .vram_valid(active_vram_read_valid),
+        .vram_row(active_vram_read_row),
+        .vram_col(active_vram_read_col),
+        .vram_byte(active_vram_read_byte),
 
-        .display_port(display_port),
+        .active_port(active_port),
         .v_sync(v_sync),
 
         .hdmi_clk_n(hdmi_clk_n),

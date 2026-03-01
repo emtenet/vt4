@@ -8,15 +8,15 @@ module hdmi
 
     input   wire [4:0]  top_row,
 
+    input   wire [4:0]  cursor_row,
+    input   wire [6:0]  cursor_col,
+
     output  wire        vram_valid,
     output  wire [4:0]  vram_row,
     output  wire [6:0]  vram_col,
     input   wire [7:0]  vram_byte,
 
-    input   wire [4:0]  cursor_row,
-    input   wire [6:0]  cursor_col,
-
-    input   wire [1:0]  display_port,
+    input   wire [1:0]  active_port,
     output  wire        v_sync,
 
     output  wire        hdmi_clk_n,
@@ -173,7 +173,7 @@ module hdmi
     wire [23:0]  border_rgb;
 
     always_comb begin
-        case (display_port)
+        case (active_port)
             2'h0: border_rgb = 24'b110000000000000000000000;
             2'h1: border_rgb = 24'b000000001100000000000000;
             2'h2: border_rgb = 24'b000000000000000011000000;

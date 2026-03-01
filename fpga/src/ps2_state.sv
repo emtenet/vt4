@@ -40,9 +40,9 @@ module ps2_state
     output  logic       scan_code_is_special,
     output  logic       scan_code_is_status,
 
-    input   wire        display_switch_ready,
-    output  reg         display_switch_valid,
-    output  reg [1:0]   display_switch_to,
+    input   wire        switch_active_ready,
+    output  reg         switch_active_valid,
+    output  reg [1:0]   switch_active_to,
 );
 
     localparam  EXTENDED = YES;
@@ -92,8 +92,8 @@ module ps2_state
     logic       set_right_shift_is_down;
     logic       set_left_control_is_down;
     logic       set_right_control_is_down;
-    logic       set_display_switch;
-    logic [1:0] set_display_switch_to;
+    logic       set_switch_active;
+    logic [1:0] set_switch_active_to;
 
     initial begin
         extended = NO;
@@ -110,8 +110,8 @@ module ps2_state
         left_control_is_down = NO;
         right_control_is_down = NO;
 
-        display_switch_valid = NO;
-        display_switch_to = 2'h0;
+        switch_active_valid = NO;
+        switch_active_to = 2'h0;
     end
 
     always_comb begin
@@ -136,8 +136,8 @@ module ps2_state
         set_left_control_is_down = NO;
         set_right_control_is_down = NO;
 
-        set_display_switch = NO;
-        set_display_switch_to = 2'h0;
+        set_switch_active = NO;
+        set_switch_active_to = 2'h0;
 
         alt_is_down = left_alt_is_down | right_alt_is_down;
         control_is_down = left_control_is_down | right_control_is_down;
@@ -181,8 +181,8 @@ module ps2_state
                         scan_code_is_special = YES;
                     end else begin
                         scan_code_is_special = alt_is_down;
-                        set_display_switch = alt_is_down;
-                        set_display_switch_to = 2'h0;
+                        set_switch_active = alt_is_down;
+                        set_switch_active_to = 2'h0;
                     end
                 end
                 {SCAN_CODE_F2, NORMAL}: begin
@@ -190,8 +190,8 @@ module ps2_state
                         scan_code_is_special = YES;
                     end else begin
                         scan_code_is_special = alt_is_down;
-                        set_display_switch = alt_is_down;
-                        set_display_switch_to = 2'h1;
+                        set_switch_active = alt_is_down;
+                        set_switch_active_to = 2'h1;
                     end
                 end
                 {SCAN_CODE_F3, NORMAL}: begin
@@ -199,8 +199,8 @@ module ps2_state
                         scan_code_is_special = YES;
                     end else begin
                         scan_code_is_special = alt_is_down;
-                        set_display_switch = alt_is_down;
-                        set_display_switch_to = 2'h2;
+                        set_switch_active = alt_is_down;
+                        set_switch_active_to = 2'h2;
                     end
                 end
                 {SCAN_CODE_F4, NORMAL}: begin
@@ -208,8 +208,8 @@ module ps2_state
                         scan_code_is_special = YES;
                     end else begin
                         scan_code_is_special = alt_is_down;
-                        set_display_switch = alt_is_down;
-                        set_display_switch_to = 2'h3;
+                        set_switch_active = alt_is_down;
+                        set_switch_active_to = 2'h3;
                     end
                 end
                 {SCAN_CODE_LEFT_SHIFT, NORMAL}: begin
@@ -298,12 +298,12 @@ module ps2_state
             end
         end
 
-        if (display_switch_valid && display_switch_ready) begin
-            display_switch_valid <= NO;
+        if (switch_active_valid && switch_active_ready) begin
+            switch_active_valid <= NO;
         end
-        if (set_display_switch) begin
-            display_switch_valid <= YES;
-            display_switch_to <= set_display_switch_to;
+        if (set_switch_active) begin
+            switch_active_valid <= YES;
+            switch_active_to <= set_switch_active_to;
         end
 
         if (reset_low == LOW) begin
@@ -321,8 +321,8 @@ module ps2_state
             left_control_is_down <= NO;
             right_control_is_down <= NO;
 
-            display_switch_valid <= NO;
-            display_switch_to <= 2'h0;
+            switch_active_valid <= NO;
+            switch_active_to <= 2'h0;
         end
     end
 
