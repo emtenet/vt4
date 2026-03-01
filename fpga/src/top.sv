@@ -67,7 +67,7 @@ module top
     );
 
     //==========================================
-    // VRAM
+    // Write characters to VRAM
     //==========================================
 
     wire        vram_read_ready;
@@ -75,33 +75,6 @@ module top
     wire [4:0]  vram_read_row;
     wire [6:0]  vram_read_col;
     wire [7:0]  vram_read_byte;
-
-    wire        vram_write_ready;
-    wire        vram_write_valid;
-    reg [4:0]   vram_write_row;
-    reg [6:0]   vram_write_col;
-    wire [7:0]  vram_write_byte;
-
-    vram vram
-    (
-        .clk(clk),
-
-        .read_ready(vram_read_ready),
-        .read_valid(vram_read_valid),
-        .read_row(vram_read_row),
-        .read_col(vram_read_col),
-        .read_byte(vram_read_byte),
-
-        .write_ready(vram_write_ready),
-        .write_valid(vram_write_valid),
-        .write_row(vram_write_row),
-        .write_col(vram_write_col),
-        .write_byte(vram_write_byte)
-    );
-
-    //==========================================
-    // Write characters to VRAM
-    //==========================================
 
     wire [4:0]  top_row;
 
@@ -125,11 +98,11 @@ module top
         .key_code_valid(key_code_valid),
         .key_code_byte(key_code_byte),
 
-        .vram_ready(vram_write_ready),
-        .vram_valid(vram_write_valid),
-        .vram_row(vram_write_row),
-        .vram_col(vram_write_col),
-        .vram_byte(vram_write_byte),
+        .vram_read_ready(vram_read_ready),
+        .vram_read_valid(vram_read_valid),
+        .vram_read_row(vram_read_row),
+        .vram_read_col(vram_read_col),
+        .vram_read_byte(vram_read_byte),
 
         .top_row(top_row),
 

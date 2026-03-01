@@ -16,17 +16,21 @@ module vt
     output  logic       key_code_valid,
     output  logic [7:0] key_code_byte,
 
-    input   wire        vram_ready,
-    output  logic       vram_valid,
-    output  logic [4:0] vram_row,
-    output  logic [6:0] vram_col,
-    output  logic [7:0] vram_byte,
+    output  wire        vram_read_ready,
+    input   wire        vram_read_valid,
+    input   wire [4:0]  vram_read_row,
+    input   wire [6:0]  vram_read_col,
+    output  wire [7:0]  vram_read_byte,
 
     output  reg [4:0]   top_row,
 
     output  reg [4:0]   cursor_row,
     output  reg [6:0]   cursor_col
 );
+
+    //==========================================
+    // UART
+    //==========================================
 
     wire        display_code_ready;
     wire        display_code_valid;
@@ -52,6 +56,37 @@ module vt
         .tx_valid(key_code_valid),
         .tx_byte(key_code_byte)
     );
+
+    wire        vram_write_ready;
+    wire        vram_write_valid;
+    reg [4:0]   vram_write_row;
+    reg [6:0]   vram_write_col;
+    wire [7:0]  vram_write_byte;
+
+    //==========================================
+    // VRAM
+    //==========================================
+
+    vram vram
+    (
+        .clk(clk),
+
+        .read_ready(vram_read_ready),
+        .read_valid(vram_read_valid),
+        .read_row(vram_read_row),
+        .read_col(vram_read_col),
+        .read_byte(vram_read_byte),
+
+        .write_ready(vram_write_ready),
+        .write_valid(vram_write_valid),
+        .write_row(vram_write_row),
+        .write_col(vram_write_col),
+        .write_byte(vram_write_byte)
+    );
+
+    //==========================================
+    // Display state machine
+    //==========================================
 
     localparam  LEFT_COL            = 7'd0;
     localparam  RIGHT_COL           = 7'd99;
@@ -98,10 +133,10 @@ module vt
     always_comb begin
         display_code_ready = NO;
 
-        vram_valid = NO;
-        vram_row = cursor_row;
-        vram_col = cursor_col;
-        vram_byte = display_byte;
+        vram_write_valid = NO;
+        vram_write_row = cursor_row;
+        vram_write_col = cursor_col;
+        vram_write_byte = display_byte;
 
         display = NO;
         cursor_down = NO;
@@ -139,9 +174,9 @@ module vt
                 end
             end
             STATE_DISPLAY: begin
-                vram_valid = YES;
-                if (vram_ready) begin
-                    if (vram_col == RIGHT_COL) begin
+                vram_write_valid = YES;
+                if (vram_write_ready) begin
+                    if (vram_write_col == RIGHT_COL) begin
                         cursor_home = YES;
                         cursor_down = YES;
                         if (cursor_row == bottom_row) begin
@@ -154,11 +189,11 @@ module vt
                 end
             end
             STATE_SCROLL: begin
-                vram_valid = YES;
-                vram_row = bottom_row;
-                vram_col = bottom_col;
-                vram_byte = " ";
-                if (vram_ready) begin
+                vram_write_valid = YES;
+                vram_write_row = bottom_row;
+                vram_write_col = bottom_col;
+                vram_write_byte = " ";
+                if (vram_write_ready) begin
                     if (bottom_col == RIGHT_COL) begin
                         state_idle = YES;
                     end else begin
